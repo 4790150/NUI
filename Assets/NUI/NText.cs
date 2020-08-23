@@ -396,6 +396,8 @@ namespace NUI
             }
         }
 
+        public bool SingleLine;
+
         private bool m_HasGenerated;
         private string _lastText;
         private NTextGenerationSettings _lastSettings;
@@ -621,6 +623,7 @@ namespace NUI
                 ParagraphIndent = ParagraphIndent,
                 OverflowEllipsis = OverflowEllipsis,
                 maxOverflowWidth = MaxOverflowWidth,
+                SingleLine = SingleLine,
             };
             return generationSettings;
         }

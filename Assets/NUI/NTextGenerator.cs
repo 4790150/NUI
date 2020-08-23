@@ -92,6 +92,7 @@ namespace NUI
         public int ParagraphIndent;
         public bool OverflowEllipsis;
         public float maxOverflowWidth;
+        public bool SingleLine;
 
         private bool CompareColors(Color left, Color right)
         {
@@ -112,8 +113,8 @@ namespace NUI
                 this.verticalOverflow == other.verticalOverflow && this.CompareVector2(this.generationExtents, other.generationExtents) && this.CompareVector2(this.pivot, other.pivot) &&
                 ReferenceEquals(this.font, other.font) && ReferenceEquals(this.Sprites, other.Sprites) && this.DefaultAnimLength == other.DefaultAnimLength && this.DefaultAnimFrame == other.DefaultAnimFrame &&
                 Mathf.Approximately(this.DefaultSpriteScale, other.DefaultSpriteScale) && this.DefaultSpriteAlign == other.DefaultSpriteAlign && this.GradientColor == other.GradientColor && CompareColors(this.BottomColor, other.BottomColor) &&
-                this.Outline == other.Outline && CompareColors(this.OutlineColor, other.OutlineColor) && Mathf.Approximately(this.OutlineSize, other.OutlineSize) && 
-                this.ParagraphIndent == other.ParagraphIndent && this.OverflowEllipsis == other.OverflowEllipsis && Mathf.Approximately(this.maxOverflowWidth, other.maxOverflowWidth);
+                this.Outline == other.Outline && CompareColors(this.OutlineColor, other.OutlineColor) && Mathf.Approximately(this.OutlineSize, other.OutlineSize) && this.ParagraphIndent == other.ParagraphIndent &&
+                this.OverflowEllipsis == other.OverflowEllipsis && Mathf.Approximately(this.maxOverflowWidth, other.maxOverflowWidth) && this.SingleLine == other.SingleLine;
         }
 
         public int SpriteLength { get { return null == Sprites ? 0 : Sprites.Length; } }
@@ -137,7 +138,8 @@ namespace NUI
         public int characterCount { get; private set; }
         public int characterCountVisible { get { return characterCount - 1; } }
 
-
+        private float fontSpacing = 0.0f;
+        private float ascent = 0.0f;
 
         public void PopulateAlways(List<NRichTextElement> elements, NTextGenerationSettings settings)
         {
@@ -164,6 +166,9 @@ namespace NUI
             var lineRect = TextLinePool.Get();
             lineRect.ParagraphIndent = settings.ParagraphIndent;
             lines.Add(lineRect);
+
+            fontSpacing = settings.font.fontSize == 0 ? 0.0f : (settings.font.lineHeight + 1.0f) * settings.fontSize / settings.font.fontSize;
+            ascent = settings.font.fontSize == 0 ? 0.0f : (settings.font.ascent + 1.0f) * settings.fontSize / settings.font.fontSize;
 
             var charUnderlineInfo = new CharacterInfo();
             var charPeriodInfo = new CharacterInfo();
@@ -200,7 +205,7 @@ namespace NUI
                 }
             }
 
-            float ascent = settings.font.fontSize == 0 ? 0.0f : (settings.font.ascent + 1.0f) * settings.fontSize / settings.font.fontSize;
+            bool discardAfter = false;
             for (int elementIndex = 0; elementIndex < elements.Count; elementIndex++)
             {
                 var element = elements[elementIndex];
@@ -212,7 +217,7 @@ namespace NUI
                     var txt = element.Text;
                     int size = element.FontSize;
                     FontStyle style = element.FontStyle;
-                    Color32? underlineColor = element.UnderlineColor ?? (element.LinkParam == null ? (Color32?)null : element.TopColor);
+                    Color32? underlineColor = element.UnderlineColor;
                     Color32? strikethroughColor = element.StrikethroughColor;
 
                     if (!string.IsNullOrEmpty(element.LinkParam))
@@ -224,6 +229,12 @@ namespace NUI
                         var ch = txt[charIndex];
                         if (ch == '\r' || ch == '\n')
                         {
+                            if (settings.SingleLine)
+                            {
+                                discardAfter = true;
+                                break;
+                            }
+
                             var newGlyph = TextGlyphPool.Get();
                             newGlyph.Char = ch;
                             newGlyph.CustomCharTag = element.CustomCharTag;
@@ -236,10 +247,15 @@ namespace NUI
                                 lineRect.ParagraphIndent = settings.ParagraphIndent;
                                 lineRect.startCharIdx = characters.Count;
                                 lines.Add(lineRect);
-                            }
 
-                            //if (ch == '\r' && charIndex + 1 < txt.Length && txt[charIndex + 1] == '\n')
-                            //	charIndex++;
+                                if (!CalcLineHeight(lines.Count - 2, settings))
+                                {
+                                    ReleaseEndLine();
+                                    ReleaseEndLine();
+                                    discardAfter = true;
+                                    break;
+                                }
+                            }
                         }
                         else if (ch == '\t')
                         {
@@ -256,7 +272,13 @@ namespace NUI
                             if ((settings.horizontalOverflow == HorizontalWrapMode.Wrap && lineRect.Width + info.advance > settings.generationExtents.x - lineRect.ParagraphIndent) ||
                                 (settings.horizontalOverflow == HorizontalWrapMode.Overflow && settings.maxOverflowWidth > 0 && lineRect.Width + info.advance > settings.maxOverflowWidth - lineRect.ParagraphIndent))
                             {
-                                var lastLineGlyph = lineRect;
+                                if (settings.SingleLine)
+                                {
+                                    discardAfter = true;
+                                    break;
+                                }
+
+                                var lastLine = lineRect;
                                 lineRect = TextLinePool.Get();
                                 lineRect.startCharIdx = characters.Count;
                                 lines.Add(lineRect);
@@ -265,7 +287,7 @@ namespace NUI
                                 {
                                     int glyphIndex = characters.Count;
                                     int idx = charIndex;
-                                    while (idx > 0 && glyphIndex > lastLineGlyph.startCharIdx)
+                                    while (idx > 0 && glyphIndex > lastLine.startCharIdx)
                                     {
                                         idx--;
                                         glyphIndex--;
@@ -277,14 +299,22 @@ namespace NUI
                                     {
                                         for (int index = glyphIndex + 1; index < characters.Count; index++)
                                         {
-                                            lastLineGlyph.Width -= characters[index].Advance;
+                                            lastLine.Width -= characters[index].Advance;
                                             lineRect.Width += characters[index].Advance;
                                         }
 
-                                        lastLineGlyph.endCharIdx = glyphIndex + 1;
+                                        lastLine.endCharIdx = glyphIndex + 1;
                                         lineRect.startCharIdx = glyphIndex + 1;
                                         lineRect.endCharIdx = characters.Count;
                                     }
+                                }
+
+                                if (!CalcLineHeight(lines.Count - 2, settings))
+                                {
+                                    ReleaseEndLine();
+                                    ReleaseEndLine();
+                                    discardAfter = true;
+                                    break;
                                 }
                             }
 
@@ -318,6 +348,9 @@ namespace NUI
 
                     if (!string.IsNullOrEmpty(element.LinkParam) && Links.Count > 0)
                         Links[Links.Count - 1].GlyphEnd = characters.Count - 1;
+
+                    if (discardAfter)
+                        break;
                 }
                 else
                 {
@@ -331,12 +364,27 @@ namespace NUI
                     Sprite sprite = settings.Sprites[spriteIndex];
 
                     float spriteWidth = sprite.rect.width * element.SpriteScale;
+
                     if ((settings.horizontalOverflow == HorizontalWrapMode.Wrap && lineRect.Width + spriteWidth > settings.generationExtents.x - lineRect.ParagraphIndent) ||
                         (settings.horizontalOverflow == HorizontalWrapMode.Overflow && settings.maxOverflowWidth > 0 && lineRect.Width + spriteWidth > settings.maxOverflowWidth - lineRect.ParagraphIndent))
                     {
+                        if (settings.SingleLine)
+                        {
+                            discardAfter = true;
+                            break;
+                        }
+
                         lineRect = TextLinePool.Get();
                         lineRect.startCharIdx = characters.Count;
                         lines.Add(lineRect);
+
+                        if (!CalcLineHeight(lines.Count - 2, settings))
+                        {
+                            ReleaseEndLine();
+                            ReleaseEndLine();
+                            discardAfter = true;
+                            break;
+                        }
                     }
 
                     var uv = UnityEngine.Sprites.DataUtility.GetOuterUV(sprite);
@@ -376,65 +424,16 @@ namespace NUI
                 }
             }
 
-            float lastBaseLine = 0.0f;
-            float lastLineOffsetY = 0.0f;
-            float fontSpacing = settings.font.fontSize == 0 ? 0.0f : (settings.font.lineHeight + 1.0f) * settings.fontSize / settings.font.fontSize;
-
-            int lineCount = lines.Count;
-            int lineIndex = 0;
-            for (; lineIndex < lineCount;)
+            if (!discardAfter)
             {
-                var thisLineRect = lines[lineIndex];
-                thisLineRect.Height = ascent;
-
-                if (thisLineRect.Width + thisLineRect.ParagraphIndent > RealTextWidth)
-                    RealTextWidth = thisLineRect.Width + thisLineRect.ParagraphIndent;
-
-                var lineSpacingMax = 0 == lineIndex ? ascent : fontSpacing;
-                var thisLineOffsetY = 0.0f;
-                for (var glyphIndex = thisLineRect.startCharIdx; glyphIndex < thisLineRect.endCharIdx && glyphIndex < characters.Count; glyphIndex++)
-                {
-                    var glyph = characters[glyphIndex];
-                    if (Mathf.Abs(glyph.Height) + glyph.MinY - lastLineOffsetY > lineSpacingMax)
-                        lineSpacingMax = Mathf.Abs(glyph.Height) + glyph.MinY - lastLineOffsetY;
-                    if (Mathf.Abs(glyph.Height) + glyph.MinY > thisLineRect.Height)
-                        thisLineRect.Height = Mathf.Abs(glyph.Height) + glyph.MinY;
-                    if (glyph.MinY < thisLineOffsetY)
-                        thisLineOffsetY = glyph.MinY;
-                }
-
-                lastBaseLine -= 0 == lineIndex ? lineSpacingMax : lineSpacingMax * settings.lineSpacing;
-                if (!settings.generateOutOfBounds && settings.verticalOverflow == VerticalWrapMode.Truncate && lastBaseLine + thisLineOffsetY < -settings.generationExtents.y)
-                {
-                    //LinePool.Release(thisLineRect);
-                    break;  // 剩下的内容丢弃
-                }
-                else
-                {
-                    lineIndex++;
-                    //RealTextHeight = -lastBaseLine - Mathf.Min(charUnderlineInfo.minY, thisLineOffsetY);
-                    RealTextHeight = -lastBaseLine - thisLineOffsetY;
-                    thisLineRect.BaseLine = lastBaseLine;
-                    thisLineRect.OffsetY = thisLineOffsetY;
-                }
-
-                lastLineOffsetY = thisLineOffsetY;
-            }
-
-            // 控件下方不显示的内容丢弃
-            if (lineIndex < lineCount)
-            {
-                characterCount = lines[lineIndex].startCharIdx;
-                lines.RemoveRange(lineIndex, lineCount - lineIndex);
-            }
-            else
-            {
-                characterCount = characters.Count + 1;
+                if (!CalcLineHeight(lines.Count - 1, settings))
+                    ReleaseEndLine();
             }
 
             // for InputField
             characters.Add(TextGlyphPool.Get());
             lineRect.endCharIdx = characters.Count;
+            characterCount = characters.Count;
 
             float halfWidth = settings.generationExtents.x / 2;
             float halfHeight = settings.generationExtents.y / 2;
@@ -499,7 +498,7 @@ namespace NUI
                 }
             }
 
-            for (lineIndex = 0; lineIndex < lines.Count; lineIndex++)
+            for (int lineIndex = 0; lineIndex < lines.Count; lineIndex++)
             {
                 var thisLineRect = lines[lineIndex];
                 thisLineRect.BaseLine = startY + thisLineRect.BaseLine;
@@ -702,7 +701,53 @@ namespace NUI
             }
         }
 
+        private bool CalcLineHeight(int lineIndex, NTextGenerationSettings settings)
+        {
+            if (lineIndex >= lines.Count)
+                return false;
 
+            float lastLineOffsetY = lineIndex > 0 ? lines[lineIndex - 1].OffsetY : 0f;
+            float lastBaseLine = lineIndex > 0 ? lines[lineIndex - 1].BaseLine : 0f;
+            var thisLineRect = lines[lineIndex];
+            thisLineRect.Height = ascent;
+
+            if (thisLineRect.Width + thisLineRect.ParagraphIndent > RealTextWidth)
+                RealTextWidth = thisLineRect.Width + thisLineRect.ParagraphIndent;
+
+            var lineSpacingMax = 0 == lineIndex ? ascent : fontSpacing;
+            for (var glyphIndex = thisLineRect.startCharIdx; glyphIndex < thisLineRect.endCharIdx && glyphIndex < characters.Count; glyphIndex++)
+            {
+                var glyph = characters[glyphIndex];
+                if (Mathf.Abs(glyph.Height) + glyph.MinY - lastLineOffsetY > lineSpacingMax)
+                    lineSpacingMax = Mathf.Abs(glyph.Height) + glyph.MinY - lastLineOffsetY;
+                if (Mathf.Abs(glyph.Height) + glyph.MinY > thisLineRect.Height)
+                    thisLineRect.Height = Mathf.Abs(glyph.Height) + glyph.MinY;
+                if (glyph.MinY < thisLineRect.OffsetY)
+                    thisLineRect.OffsetY = glyph.MinY;
+            }
+
+            thisLineRect.BaseLine = lastBaseLine - (0 == lineIndex ? lineSpacingMax : lineSpacingMax * settings.lineSpacing);
+
+            if (!settings.generateOutOfBounds && settings.verticalOverflow == VerticalWrapMode.Truncate && thisLineRect.BaseLine + thisLineRect.OffsetY < -settings.generationExtents.y)
+                return false;  // 剩下的内容丢弃
+
+            RealTextHeight = -thisLineRect.BaseLine - thisLineRect.OffsetY;
+            return true;
+        }
+
+        private void ReleaseEndLine()
+        {
+            var endCharIdx = characters.Count;
+            var line = lines[lines.Count - 1];
+            for (int i = endCharIdx - 1; i >= line.startCharIdx; i--)
+            {
+                TextGlyphPool.Release(characters[i]);
+            }
+            characters.RemoveRange(line.startCharIdx, endCharIdx - line.startCharIdx);
+
+            TextLinePool.Release(line);
+            lines.RemoveAt(lines.Count - 1);
+        }
  
 
 

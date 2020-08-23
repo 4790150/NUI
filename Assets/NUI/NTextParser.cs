@@ -64,14 +64,13 @@ namespace NUI
                     {
                         if (i > startIndex)
                         {
-                            var element = new NRichTextElement
-                            {
-                                Text = content.Substring(startIndex, i - startIndex),
-                                TopColor = settings.color,
-                                BottomColor = settings.GradientColor ? settings.BottomColor : settings.color,
-                                FontStyle = settings.fontStyle,
-                                FontSize = settings.fontSize,
-                            };
+                            var element = TextElementPool.Get();
+                            element.Text = content.Substring(startIndex, i - startIndex);
+                            element.TopColor = settings.color;
+                            element.BottomColor = settings.GradientColor ? settings.BottomColor : settings.color;
+                            element.FontStyle = settings.fontStyle;
+                            element.FontSize = settings.fontSize;
+
                             elements.Add(element);
                         }
                         elements.Add(custom[unicode]);
@@ -91,8 +90,8 @@ namespace NUI
                                 element.FontStyle = _htmlFontStyle;
                                 element.FontSize = _htmlFontSize;
                                 element.LinkParam = _linkParam;
-                                element.StrikethroughColor = _strikethroughColor == null ? (Color32?)null : _strikethroughColor ?? _htmlTopColor;
-                                element.UnderlineColor = _underlineColor == null ? (Color32?)null : _underlineColor ?? _htmlTopColor;
+                                element.StrikethroughColor = _strikethroughColor == null ? (Color32?)null : _strikethroughColor;
+                                element.UnderlineColor = _underlineColor == null ? (Color32?)null : _underlineColor;
                                 elements.Add(element);
                             }
 
@@ -106,8 +105,8 @@ namespace NUI
                                 element.BottomColor = _spriteColor;
                                 element.AnimLength = _animLength;
                                 element.AnimFrame = _animFrame;
-                                element.StrikethroughColor = _strikethroughColor == null ? (Color32?)null : _strikethroughColor ?? _htmlTopColor;
-                                element.UnderlineColor = _underlineColor == null ? (Color32?)null : _underlineColor ?? _htmlTopColor;
+                                element.StrikethroughColor = _strikethroughColor == null ? (Color32?)null : _strikethroughColor;
+                                element.UnderlineColor = _underlineColor == null ? (Color32?)null : _underlineColor;
                                 elements.Add(element);
                             }
 
@@ -134,8 +133,8 @@ namespace NUI
                     element.FontStyle = _htmlFontStyle;
                     element.FontSize = _htmlFontSize;
                     element.LinkParam = _linkParam;
-                    element.StrikethroughColor = _strikethroughColor == null ? (Color32?)null : _strikethroughColor ?? _htmlTopColor;
-                    element.UnderlineColor = _underlineColor == null ? (Color32?)null : _underlineColor ?? _htmlTopColor;
+                    element.StrikethroughColor = _strikethroughColor == null ? (Color32?)null : _strikethroughColor;
+                    element.UnderlineColor = _underlineColor == null ? (Color32?)null : _underlineColor;
                     elements.Add(element);
                 }
             }
@@ -148,14 +147,12 @@ namespace NUI
                     {
                         if (i > startIndex)
                         {
-                            var element = new NRichTextElement
-                            {
-                                Text = content.Substring(startIndex, i - startIndex),
-                                TopColor = settings.color,
-                                BottomColor = settings.GradientColor ? settings.BottomColor : settings.color,
-                                FontStyle = settings.fontStyle,
-                                FontSize = settings.fontSize,
-                            };
+                            var element = TextElementPool.Get();
+                            element.Text = content.Substring(startIndex, i - startIndex);
+                            element.TopColor = settings.color;
+                            element.BottomColor = settings.GradientColor ? settings.BottomColor : settings.color;
+                            element.FontStyle = settings.fontStyle;
+                            element.FontSize = settings.fontSize;
                             elements.Add(element);
                         }
 
