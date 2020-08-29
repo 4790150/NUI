@@ -231,6 +231,7 @@ namespace NUI
                         {
                             if (settings.SingleLine)
                             {
+                                CalcLineHeight(lines.Count - 1, settings);
                                 discardAfter = true;
                                 break;
                             }
@@ -274,6 +275,7 @@ namespace NUI
                             {
                                 if (settings.SingleLine)
                                 {
+                                    CalcLineHeight(lines.Count - 1, settings);
                                     discardAfter = true;
                                     break;
                                 }
@@ -370,6 +372,7 @@ namespace NUI
                     {
                         if (settings.SingleLine)
                         {
+                            CalcLineHeight(lines.Count - 1, settings);
                             discardAfter = true;
                             break;
                         }
