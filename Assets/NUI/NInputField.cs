@@ -2104,6 +2104,64 @@ namespace NUI
                         break;
                 }
             }
+
+            // 剔除不需要显示的图片和动画信息
+            var removed = NListPool<int>.Get();
+            foreach (var glyph in ImgGlyphs)
+            {
+                if (glyph.Key < m_DrawStart || glyph.Key >= m_DrawEnd)
+                {
+                    removed.Add(glyph.Key);
+                }
+            }
+            foreach (int index in removed)
+                ImgGlyphs.Remove(index);
+
+            removed.Clear();
+            foreach (var glyph in cachedInputTextGenerator.AnimGlyphs)
+            {
+                if (glyph.Key < m_DrawStart || glyph.Key >= m_DrawEnd)
+                {
+                    removed.Add(glyph.Key);
+                }
+            }
+            foreach (int index in removed)
+                cachedInputTextGenerator.AnimGlyphs.Remove(index);
+            NListPool<int>.Release(removed);
+
+            if (m_DrawStart > 0)
+            {
+                Vector3 startPos = new Vector3();
+                var rect = textComponent.rectTransform.rect;
+
+                int currentLineIndex = DetermineCharacterLine(m_DrawStart, cachedInputTextGenerator);
+                if (currentLineIndex > 0)
+                {
+                    var lastline = cachedInputTextGenerator.lines[currentLineIndex - 1];
+                    startPos.y = rect.yMax - (lastline.BaseLine + lastline.OffsetY);
+                }
+
+                var firstChar = cachedInputTextGenerator.characters[m_DrawStart];
+                startPos.x = rect.xMin - (firstChar.VertexQuad[0].position.x + firstChar.MinX);
+
+                foreach (var glyph in cachedInputTextGenerator.characters)
+                {
+                    var vertexQuad = glyph.VertexQuad;
+                    vertexQuad[0].position += startPos;
+                    vertexQuad[1].position += startPos;
+                    vertexQuad[2].position += startPos;
+                    vertexQuad[3].position += startPos;
+                }
+
+                foreach (var glyph in cachedInputTextGenerator.EffectGlyphs)
+                {
+                    var vertexQuad = glyph.VertexQuad;
+                    vertexQuad[0].position += startPos;
+                    vertexQuad[1].position += startPos;
+                    vertexQuad[2].position += startPos;
+                    vertexQuad[3].position += startPos;
+                }
+            }
         }
 
         public void ForceLabelUpdate()
@@ -2275,21 +2333,6 @@ namespace NUI
             startPosition.y = gen.lines[characterLine].BaseLine + gen.lines[characterLine].Height;
             float height = gen.lines[characterLine].Height;
 
-            if (m_DrawStart > 0)
-            {
-                var extents = textComponent.rectTransform.rect;
-
-                int currentLineIndex = DetermineCharacterLine(m_DrawStart, cachedInputTextGenerator);
-                if (currentLineIndex > 0)
-                {
-                    var lastline = cachedInputTextGenerator.lines[currentLineIndex - 1];
-                    startPosition.y += extents.yMax - (lastline.BaseLine + lastline.OffsetY);
-                }
-
-                var firstChar = cachedInputTextGenerator.characters[m_DrawStart];
-                startPosition.x += extents.xMin - (firstChar.VertexQuad[0].position.x + firstChar.MinX);
-            }
-
             for (int i = 0; i < m_CursorVerts.Length; i++)
                 m_CursorVerts[i].color = caretColor;
 
@@ -2391,20 +2434,6 @@ namespace NUI
             //{
             //	height = cachedInputTextGenerator.fontSizeUsedForBestFit;
             //}
-            Vector3 startPos = Vector3.zero;
-            if (m_DrawStart > 0)
-            {
-                var extents = textComponent.rectTransform.rect;
-                int drawStartLine = DetermineCharacterLine(m_DrawStart, gen);
-                if (drawStartLine > 0)
-                {
-                    var lastline = cachedInputTextGenerator.lines[drawStartLine - 1];
-                    startPos.y = extents.yMax - (lastline.BaseLine + lastline.OffsetY);
-                }
-
-                var firstChar = cachedInputTextGenerator.characters[m_DrawStart];
-                startPos.x = extents.xMin - (firstChar.VertexQuad[0].position.x + firstChar.MinX);
-            }
 
             int currentChar = startChar;
             while (currentChar <= endChar && currentChar < gen.characterCount)
@@ -2423,16 +2452,16 @@ namespace NUI
                         endPosition.x = textComponent.rectTransform.rect.xMax;
 
                     var startIndex = vbo.currentVertCount;
-                    vert.position = new Vector3(startPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset + startPos;
+                    vert.position = new Vector3(startPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset;
                     vbo.AddVert(vert);
 
-                    vert.position = new Vector3(endPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset + startPos;
+                    vert.position = new Vector3(endPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset;
                     vbo.AddVert(vert);
 
-                    vert.position = new Vector3(endPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset + startPos;
+                    vert.position = new Vector3(endPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset;
                     vbo.AddVert(vert);
 
-                    vert.position = new Vector3(startPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset + startPos;
+                    vert.position = new Vector3(startPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset;
                     vbo.AddVert(vert);
 
                     vbo.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
@@ -3122,6 +3151,7 @@ namespace NUI
             return raycastTarget;
         }
 
+
         UIVertex[] vertexQuad = new UIVertex[4];
         protected override void OnPopulateMesh(VertexHelper vh)
         {
@@ -3134,52 +3164,18 @@ namespace NUI
             //}
 
             vh.Clear();
-
-            Vector3 startPos = new Vector3();
-            var extents = textComponent.rectTransform.rect ;
-            if (m_DrawStart > 0)
+            for (int i = m_DrawStart; i < m_DrawEnd; i++)
             {
-                int currentLineIndex = DetermineCharacterLine(m_DrawStart, cachedInputTextGenerator);
-                if (currentLineIndex > 0)
+                if (!cachedInputTextGenerator.characters[i].IsImage())
                 {
-                    var lastline = cachedInputTextGenerator.lines[currentLineIndex - 1];
-                    startPos.y = extents.yMax - (lastline.BaseLine + lastline.OffsetY);
-                }
-
-                var firstChar = cachedInputTextGenerator.characters[m_DrawStart];
-                startPos.x = extents.xMin - (firstChar.VertexQuad[0].position.x + firstChar.MinX);
-
-                for (int i = m_DrawStart; i < m_DrawEnd; i++)
-                {
-                    if (!cachedInputTextGenerator.characters[i].IsImage())
-                    {
-                        Array.Copy(cachedInputTextGenerator.characters[i].VertexQuad, vertexQuad, 4);
-                        vertexQuad[0].position += startPos;
-                        vertexQuad[1].position += startPos;
-                        vertexQuad[2].position += startPos;
-                        vertexQuad[3].position += startPos;
-                        vh.AddUIVertexQuad(vertexQuad);
-                    }
-                }
-            }
-            else
-            {
-                for (int i = m_DrawStart; i < m_DrawEnd; i++)
-                {
-                    if (!cachedInputTextGenerator.characters[i].IsImage())
-                    {
-                        vh.AddUIVertexQuad(cachedInputTextGenerator.characters[i].VertexQuad);
-                    }
+                    vh.AddUIVertexQuad(cachedInputTextGenerator.characters[i].VertexQuad);
                 }
             }
 
+            var extents = textComponent.rectTransform.rect;
             foreach (var glyph in cachedInputTextGenerator.EffectGlyphs)
             {
                 Array.Copy(glyph.VertexQuad, vertexQuad, 4);
-                vertexQuad[0].position += startPos;
-                vertexQuad[1].position += startPos;
-                vertexQuad[2].position += startPos;
-                vertexQuad[3].position += startPos;
 
                 if ((vertexQuad[0].position.x > extents.xMin && vertexQuad[0].position.x < extents.xMax && vertexQuad[0].position.y > extents.yMin && vertexQuad[0].position.y < extents.yMax) ||
                     (vertexQuad[2].position.x > extents.xMin && vertexQuad[2].position.x < extents.xMax && vertexQuad[2].position.y > extents.yMin && vertexQuad[2].position.y < extents.yMax) )

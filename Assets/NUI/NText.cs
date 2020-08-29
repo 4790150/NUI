@@ -448,11 +448,11 @@ namespace NUI
 
             foreach (var glyph in ImgGlyphs)
             {
-                var texture = ImageTexture[glyph.SpriteIndex];
+                var texture = ImageTexture[glyph.Value.SpriteIndex];
 
                 if (_richImages.ContainsKey(texture))
                 {
-                    _richImages[texture].ImgGlyphs.Add(glyph);
+                    _richImages[texture].ImgGlyphs.Add(glyph.Value);
                 }
                 else
                 {
@@ -474,7 +474,7 @@ namespace NUI
                         childRectTransform.offsetMax = Vector2.one;
 
 
-                        richImage.ImgGlyphs.Add(glyph);
+                        richImage.ImgGlyphs.Add(glyph.Value);
                         richImage.Texture = texture;
                         _richImages.Add(richImage.Texture, richImage);
                         richImage.SetAllDirty();
@@ -507,7 +507,7 @@ namespace NUI
                         childRectTransform.offsetMax = Vector2.one;
 
                         var richImage = imgGo.GetComponent<NTextImage>();
-                        richImage.ImgGlyphs.Add(glyph);
+                        richImage.ImgGlyphs.Add(glyph.Value);
                         richImage.Texture = texture;
                         _richImages.Add(richImage.Texture, richImage);
                         richImage.SetAllDirty();
@@ -545,7 +545,7 @@ namespace NUI
             get { return cachedTextGenerator.characters; }
         }
 
-        public List<NTextGlyph> ImgGlyphs
+        public Dictionary<int, NTextGlyph> ImgGlyphs
         {
             get { return cachedTextGenerator.ImgGlyphs; }
         }

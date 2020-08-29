@@ -126,9 +126,9 @@ namespace NUI
         public StringBuilder RealTextBuilder = new StringBuilder();
 
         public List<NTextGlyph> characters = new List<NTextGlyph>();
-        public readonly List<NTextGlyph> ImgGlyphs = new List<NTextGlyph>();
         public readonly List<NTextGlyph> TxtGlyphs = new List<NTextGlyph>();
         public readonly List<NTextGlyph> EffectGlyphs = new List<NTextGlyph>();
+        public readonly Dictionary<int, NTextGlyph> ImgGlyphs = new Dictionary<int, NTextGlyph>();
         public readonly Dictionary<int, NTextAnim> AnimGlyphs = new Dictionary<int, NTextAnim>();
         public readonly List<NTextLink> Links = new List<NTextLink>();
         public readonly List<NTextLine> lines = new List<NTextLine>();
@@ -511,7 +511,7 @@ namespace NUI
                 {
                     var glyph = characters[glyphIndex];
                     if (glyph.IsImage())
-                        ImgGlyphs.Add(glyph);
+                        ImgGlyphs[glyphIndex] = glyph;
                     else
                         TxtGlyphs.Add(glyph);
 
