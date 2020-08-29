@@ -42,7 +42,7 @@ namespace NUI
     }
 
     public class NInputField
-        : Selectable,
+        : NText,
         IUpdateSelectedHandler,
         IBeginDragHandler,
         IDragHandler,
@@ -50,7 +50,9 @@ namespace NUI
         IPointerClickHandler,
         ISubmitHandler,
         ICanvasElement,
-        ILayoutElement
+        ILayoutElement, 
+        ISelectHandler, 
+        IDeselectHandler
     {
         public enum ContentType
         {
@@ -106,9 +108,9 @@ namespace NUI
         /// Text Text used to display the input's value.
         /// </summary>
 
-        [SerializeField]
-        [FormerlySerializedAs("text")]
-        protected NText m_TextComponent;
+        //[SerializeField]
+        //[FormerlySerializedAs("text")]
+        //protected NText m_TextComponent;
 
         [SerializeField]
         protected Graphic m_Placeholder;
@@ -201,9 +203,9 @@ namespace NUI
         /// Input field's value.
         /// </summary>
 
-        [SerializeField]
-        [FormerlySerializedAs("mValue")]
-        protected string m_Text = string.Empty;
+        //[SerializeField]
+        //[FormerlySerializedAs("mValue")]
+        //protected string m_Text = string.Empty;
 
         [SerializeField]
         [Range(0f, 4f)]
@@ -263,7 +265,13 @@ namespace NUI
         }
 
         protected NInputField()
+            : base()
         {
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
             EnforceTextHOverflow();
         }
 
@@ -277,15 +285,20 @@ namespace NUI
             }
         }
 
+        //protected NTextGenerator cachedInputTextGenerator
+        //{
+        //    get
+        //    {
+        //        if (m_InputTextCache == null)
+        //            m_InputTextCache = new NTextGenerator();
+
+        //        return m_InputTextCache;
+        //    }
+        //}
+
         protected NTextGenerator cachedInputTextGenerator
         {
-            get
-            {
-                if (m_InputTextCache == null)
-                    m_InputTextCache = new NTextGenerator();
-
-                return m_InputTextCache;
-            }
+            get { return cachedTextGenerator; }
         }
 
         /// <summary>
@@ -328,7 +341,7 @@ namespace NUI
         /// Input field's current text value.
         /// </summary>
 
-        public string text
+        public override string text
         {
             get
             {
@@ -404,7 +417,6 @@ namespace NUI
         }
 
         private int CustomRichTag = '\xe000';
-        private Dictionary<int, NTextElement> CustomElements = new Dictionary<int, NTextElement>();
         private List<NTextElement> TextElements = new List<NTextElement>();
 
         public bool isFocused
@@ -428,29 +440,34 @@ namespace NUI
         public int caretWidth { get { return m_CaretWidth; } set { if (SetPropertyUtility.SetStruct(ref m_CaretWidth, value)) MarkGeometryAsDirty(); } }
 
 
+        //public NText textComponent
+        //{
+        //    get { return m_TextComponent; }
+        //    set
+        //    {
+        //        if (m_TextComponent != null)
+        //        {
+        //            m_TextComponent.UnregisterDirtyVerticesCallback(MarkGeometryAsDirty);
+        //            m_TextComponent.UnregisterDirtyVerticesCallback(UpdateLabel);
+        //            m_TextComponent.UnregisterDirtyMaterialCallback(UpdateCaretMaterial);
+        //        }
+
+        //        if (SetPropertyUtility.SetClass(ref m_TextComponent, value))
+        //        {
+        //            EnforceTextHOverflow();
+        //            if (m_TextComponent != null)
+        //            {
+        //                m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryAsDirty);
+        //                m_TextComponent.RegisterDirtyVerticesCallback(UpdateLabel);
+        //                m_TextComponent.RegisterDirtyMaterialCallback(UpdateCaretMaterial);
+        //            }
+        //        }
+        //    }
+        //}
+
         public NText textComponent
         {
-            get { return m_TextComponent; }
-            set
-            {
-                if (m_TextComponent != null)
-                {
-                    m_TextComponent.UnregisterDirtyVerticesCallback(MarkGeometryAsDirty);
-                    m_TextComponent.UnregisterDirtyVerticesCallback(UpdateLabel);
-                    m_TextComponent.UnregisterDirtyMaterialCallback(UpdateCaretMaterial);
-                }
-
-                if (SetPropertyUtility.SetClass(ref m_TextComponent, value))
-                {
-                    EnforceTextHOverflow();
-                    if (m_TextComponent != null)
-                    {
-                        m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryAsDirty);
-                        m_TextComponent.RegisterDirtyVerticesCallback(UpdateLabel);
-                        m_TextComponent.RegisterDirtyMaterialCallback(UpdateCaretMaterial);
-                    }
-                }
-            }
+            get { return this; }
         }
 
         public Graphic placeholder { get { return m_Placeholder; } set { SetPropertyUtility.SetClass(ref m_Placeholder, value); } }
@@ -626,13 +643,13 @@ namespace NUI
             m_DrawEnd = RealTextLength;
 
             if (m_CachedInputRenderer != null)
-                m_CachedInputRenderer.SetMaterial(m_TextComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
+                m_CachedInputRenderer.SetMaterial(textComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
 
-            if (m_TextComponent != null)
+            if (textComponent != null)
             {
-                m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryAsDirty);
-                m_TextComponent.RegisterDirtyVerticesCallback(UpdateLabel);
-                m_TextComponent.RegisterDirtyMaterialCallback(UpdateCaretMaterial);
+                textComponent.RegisterDirtyVerticesCallback(MarkGeometryAsDirty);
+                textComponent.RegisterDirtyVerticesCallback(UpdateLabel);
+                textComponent.RegisterDirtyMaterialCallback(UpdateCaretMaterial);
                 UpdateLabel();
             }
         }
@@ -643,11 +660,11 @@ namespace NUI
             m_BlinkCoroutine = null;
 
             DeactivateInputField();
-            if (m_TextComponent != null)
+            if (textComponent != null)
             {
-                m_TextComponent.UnregisterDirtyVerticesCallback(MarkGeometryAsDirty);
-                m_TextComponent.UnregisterDirtyVerticesCallback(UpdateLabel);
-                m_TextComponent.UnregisterDirtyMaterialCallback(UpdateCaretMaterial);
+                textComponent.UnregisterDirtyVerticesCallback(MarkGeometryAsDirty);
+                textComponent.UnregisterDirtyVerticesCallback(UpdateLabel);
+                textComponent.UnregisterDirtyMaterialCallback(UpdateCaretMaterial);
             }
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
 
@@ -717,8 +734,8 @@ namespace NUI
 
         private void UpdateCaretMaterial()
         {
-            if (m_TextComponent != null && m_CachedInputRenderer != null)
-                m_CachedInputRenderer.SetMaterial(m_TextComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
+            if (textComponent != null && m_CachedInputRenderer != null)
+                m_CachedInputRenderer.SetMaterial(textComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
         }
 
         protected void OnFocus()
@@ -944,22 +961,22 @@ namespace NUI
 
         public Vector2 ScreenToLocal(Vector2 screen)
         {
-            var theCanvas = m_TextComponent.canvas;
+            var theCanvas = textComponent.canvas;
             if (theCanvas == null)
                 return screen;
 
             Vector3 pos = Vector3.zero;
             if (theCanvas.renderMode == RenderMode.ScreenSpaceOverlay)
             {
-                pos = m_TextComponent.transform.InverseTransformPoint(screen);
+                pos = textComponent.transform.InverseTransformPoint(screen);
             }
             else if (theCanvas.worldCamera != null)
             {
                 Ray mouseRay = theCanvas.worldCamera.ScreenPointToRay(screen);
                 float dist;
-                Plane plane = new Plane(m_TextComponent.transform.forward, m_TextComponent.transform.position);
+                Plane plane = new Plane(textComponent.transform.forward, textComponent.transform.position);
                 plane.Raycast(mouseRay, out dist);
-                pos = m_TextComponent.transform.InverseTransformPoint(mouseRay.GetPoint(dist));
+                pos = textComponent.transform.InverseTransformPoint(mouseRay.GetPoint(dist));
             }
             return new Vector2(pos.x, pos.y);
         }
@@ -969,7 +986,7 @@ namespace NUI
             if (!multiLine)
                 return 0;
 
-            float yMax = m_TextComponent.rectTransform.rect.yMax;
+            float yMax = textComponent.rectTransform.rect.yMax;
 
             // Position is above first line.
             if (pos.y > yMax)
@@ -993,7 +1010,7 @@ namespace NUI
 
         protected int GetCharacterIndexFromPosition(Vector2 pos)
         {
-            NTextGenerator gen = m_TextComponent.cachedTextGenerator;
+            NTextGenerator gen = textComponent.cachedTextGenerator;
 
             if (gen.lineCount == 0)
                 return 0;
@@ -1014,10 +1031,10 @@ namespace NUI
                     break;
 
                 NTextGlyph charInfo = gen.characters[i];
-                Vector2 charPos = charInfo.VertexQuad[0].position / m_TextComponent.pixelsPerUnit;
+                Vector2 charPos = charInfo.VertexQuad[0].position / textComponent.pixelsPerUnit;
 
                 float distToCharStart = pos.x - charPos.x;
-                float distToCharEnd = charPos.x + (charInfo.Advance / m_TextComponent.pixelsPerUnit) - pos.x;
+                float distToCharEnd = charPos.x + (charInfo.Advance / textComponent.pixelsPerUnit) - pos.x;
                 if (distToCharStart < distToCharEnd)
                 {
                     charIndex = i;
@@ -1043,7 +1060,7 @@ namespace NUI
             return IsActive() &&
                    IsInteractable() &&
                    eventData.button == PointerEventData.InputButton.Left &&
-                   m_TextComponent != null &&
+                   textComponent != null &&
                    (InPlaceEditing() || m_HideMobileInput);
         }
 
@@ -1139,6 +1156,10 @@ namespace NUI
             }
             UpdateLabel();
             eventData.Use();
+        }
+
+        public override void OnPointerUp(PointerEventData eventData)
+        {
         }
 
         protected enum EditState
@@ -1310,7 +1331,7 @@ namespace NUI
             if (c == '\t' || c == '\n')
                 return true;
 
-            return m_TextComponent.font.HasCharacter(c);
+            return textComponent.font.HasCharacter(c);
         }
 
         /// <summary>
@@ -1866,7 +1887,7 @@ namespace NUI
         /// </summary>
         protected void UpdateLabel()
         {
-            if (m_TextComponent != null && m_TextComponent.font != null && !m_PreventFontCallback)
+            if (textComponent != null && textComponent.font != null && !m_PreventFontCallback)
             {
                 // TTextGenerator.Populate invokes a callback that's called for anything
                 // that needs to be updated when the data for that font has changed.
@@ -1910,18 +1931,13 @@ namespace NUI
                     m_DrawEnd = RealTextLength;
                 }
 
-                if (!isEmpty)
+                //if (!isEmpty)
                 {
                     // Determine what will actually fit into the given line
-                    Vector2 extents = m_TextComponent.rectTransform.rect.size;
+                    Vector2 extents = textComponent.rectTransform.rect.size;
 
-                    var settings = m_TextComponent.GetGenerationSettings(m_TextComponent.GetGenerationSettings(extents));
-                    settings.SingleLine = false;
+                    var settings = textComponent.GetGenerationSettings(textComponent.GetGenerationSettings(extents));
                     settings.generateOutOfBounds = true;
-                    if (multiLine)
-                        settings.horizontalOverflow = HorizontalWrapMode.Wrap;
-                    else
-                        settings.horizontalOverflow = HorizontalWrapMode.Overflow;
 
                     cachedInputTextGenerator.PopulateAlways(NTextParser.Parse(processed, settings, TextElements, CustomElements), settings);
 
@@ -1929,11 +1945,21 @@ namespace NUI
 
                     processed = processed.Substring( CharetPositionToTextIndex(m_DrawStart, true), Mathf.Min(CharetPositionToTextIndex(m_DrawEnd), processed.Length) - CharetPositionToTextIndex(m_DrawStart, true));
 
+                    //
+                    ImageTexture.Clear();
+                    var sprites = null == SpritePackage ? Sprites : SpritePackage.Sprites;
+                    for (int i = 0; i < sprites.LengthSafe(); i++)
+                    {
+                        if (null != sprites[i])
+                            ImageTexture[i] = sprites[i].texture;
+                    }
+
                     SetCaretVisible();
                 }
-                m_TextComponent.CustomElements = CustomElements;
-                m_TextComponent.text = processed;
+                //m_TextComponent.CustomElements = CustomElements;
+                //m_TextComponent.text = processed;
                 MarkGeometryAsDirty();
+                SetAllDirty();
                 m_PreventFontCallback = false;
             }
         }
@@ -1970,7 +1996,7 @@ namespace NUI
 
             // the extents gets modified by the pixel density, so we need to use the generated extents since that will be in the same 'space' as
             // the values returned by the TextGenerator.lines[x].height for instance.
-            Vector2 extents = m_TextComponent.rectTransform.rect.size;
+            Vector2 extents = textComponent.rectTransform.rect.size;
 
             if (multiLine)
             {
@@ -2095,24 +2121,29 @@ namespace NUI
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
         }
 
-        public virtual void Rebuild(CanvasUpdate update)
+        public override void Rebuild(CanvasUpdate update)
         {
             switch (update)
             {
                 case CanvasUpdate.LatePreRender:
                     UpdateGeometry();
                     break;
+                default:
+                    base.Rebuild(update);
+                    break;
             }
         }
 
-        public virtual void LayoutComplete()
-        { }
+        //public virtual void LayoutComplete()
+        //{ }
 
-        public virtual void GraphicUpdateComplete()
-        { }
+        //public virtual void GraphicUpdateComplete()
+        //{ }
 
-        private void UpdateGeometry()
+        protected override void UpdateGeometry()
         {
+            base.UpdateGeometry();
+
 #if UNITY_EDITOR
             if (!Application.isPlaying)
                 return;
@@ -2121,17 +2152,17 @@ namespace NUI
             if (!shouldHideMobileInput)
                 return;
 
-            if (m_CachedInputRenderer == null && m_TextComponent != null)
+            if (m_CachedInputRenderer == null && textComponent != null)
             {
                 GameObject go = new GameObject(transform.name + " Input Caret", typeof(RectTransform), typeof(CanvasRenderer));
                 //go.hideFlags = HideFlags.DontSave;
-                go.transform.SetParent(m_TextComponent.transform.parent);
+                go.transform.SetParent(transform);
                 go.transform.SetAsFirstSibling();
                 go.layer = gameObject.layer;
 
                 caretRectTrans = go.GetComponent<RectTransform>();
                 m_CachedInputRenderer = go.GetComponent<CanvasRenderer>();
-                m_CachedInputRenderer.SetMaterial(m_TextComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
+                m_CachedInputRenderer.SetMaterial(textComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
 
                 // Needed as if any layout is present we want the caret to always be the same as the text area.
                 go.AddComponent<LayoutElement>().ignoreLayout = true;
@@ -2148,24 +2179,31 @@ namespace NUI
 
         private void AssignPositioningIfNeeded()
         {
-            if (m_TextComponent != null && caretRectTrans != null &&
-                (caretRectTrans.localPosition != m_TextComponent.rectTransform.localPosition ||
-                 caretRectTrans.localRotation != m_TextComponent.rectTransform.localRotation ||
-                 caretRectTrans.localScale != m_TextComponent.rectTransform.localScale ||
-                 caretRectTrans.anchorMin != m_TextComponent.rectTransform.anchorMin ||
-                 caretRectTrans.anchorMax != m_TextComponent.rectTransform.anchorMax ||
-                 caretRectTrans.anchoredPosition != m_TextComponent.rectTransform.anchoredPosition ||
-                 caretRectTrans.sizeDelta != m_TextComponent.rectTransform.sizeDelta ||
-                 caretRectTrans.pivot != m_TextComponent.rectTransform.pivot))
+            if (textComponent != null && caretRectTrans != null &&
+                (caretRectTrans.localPosition != textComponent.rectTransform.localPosition ||
+                 caretRectTrans.localRotation != textComponent.rectTransform.localRotation ||
+                 caretRectTrans.localScale != textComponent.rectTransform.localScale ||
+                 caretRectTrans.anchorMin != textComponent.rectTransform.anchorMin ||
+                 caretRectTrans.anchorMax != textComponent.rectTransform.anchorMax ||
+                 caretRectTrans.anchoredPosition != textComponent.rectTransform.anchoredPosition ||
+                 caretRectTrans.sizeDelta != textComponent.rectTransform.sizeDelta ||
+                 caretRectTrans.pivot != textComponent.rectTransform.pivot))
             {
-                caretRectTrans.localPosition = m_TextComponent.rectTransform.localPosition;
-                caretRectTrans.localRotation = m_TextComponent.rectTransform.localRotation;
-                caretRectTrans.localScale = m_TextComponent.rectTransform.localScale;
-                caretRectTrans.anchorMin = m_TextComponent.rectTransform.anchorMin;
-                caretRectTrans.anchorMax = m_TextComponent.rectTransform.anchorMax;
-                caretRectTrans.anchoredPosition = m_TextComponent.rectTransform.anchoredPosition;
-                caretRectTrans.sizeDelta = m_TextComponent.rectTransform.sizeDelta;
-                caretRectTrans.pivot = m_TextComponent.rectTransform.pivot;
+                //caretRectTrans.localPosition = textComponent.rectTransform.localPosition;
+                //caretRectTrans.localRotation = textComponent.rectTransform.localRotation;
+                //caretRectTrans.localScale = textComponent.rectTransform.localScale;
+                //caretRectTrans.anchorMin = textComponent.rectTransform.anchorMin;
+                //caretRectTrans.anchorMax = textComponent.rectTransform.anchorMax;
+                //caretRectTrans.anchoredPosition = textComponent.rectTransform.anchoredPosition;
+                //caretRectTrans.sizeDelta = textComponent.rectTransform.sizeDelta;
+                //caretRectTrans.pivot = textComponent.rectTransform.pivot;
+                caretRectTrans.localPosition = Vector3.zero;
+                caretRectTrans.localScale = Vector3.one;
+                caretRectTrans.localRotation = Quaternion.identity;
+                caretRectTrans.anchorMin = Vector2.zero;
+                caretRectTrans.anchorMax = Vector2.one;
+                caretRectTrans.sizeDelta = Vector2.zero;
+                caretRectTrans.pivot = Vector2.zero;
             }
         }
 
@@ -2179,7 +2217,7 @@ namespace NUI
                     return;
                 }
 
-                Vector2 roundingOffset = m_TextComponent.PixelAdjustPoint(Vector2.zero);
+                Vector2 roundingOffset = textComponent.PixelAdjustPoint(Vector2.zero);
                 if (!hasSelection)
                     GenerateCursor(helper, roundingOffset);
                 else
@@ -2200,8 +2238,8 @@ namespace NUI
             }
 
             float width = m_CaretWidth;
-            int adjustedPos = Mathf.Max(0, caretPositionInternal - m_DrawStart);
-            NTextGenerator gen = m_TextComponent.cachedTextGenerator;
+            int adjustedPos = Mathf.Max(0, caretPositionInternal);
+            NTextGenerator gen = textComponent.cachedTextGenerator;
 
             if (gen == null)
                 return;
@@ -2227,7 +2265,7 @@ namespace NUI
             //	startPosition.x = cursorChar.VertexQuad[0].position.x;
             //	startPosition.y = cursorChar.VertexQuad[0].position.y;
             //}
-            startPosition.x /= m_TextComponent.pixelsPerUnit;
+            startPosition.x /= textComponent.pixelsPerUnit;
 
             // TODO: Only clamp when Text uses horizontal word wrap.
             //if (startPosition.x > m_TextComponent.rectTransform.rect.xMax)
@@ -2236,6 +2274,21 @@ namespace NUI
             int characterLine = DetermineCharacterLine(adjustedPos, gen);
             startPosition.y = gen.lines[characterLine].BaseLine + gen.lines[characterLine].Height;
             float height = gen.lines[characterLine].Height;
+
+            if (m_DrawStart > 0)
+            {
+                var extents = textComponent.rectTransform.rect;
+
+                int currentLineIndex = DetermineCharacterLine(m_DrawStart, cachedInputTextGenerator);
+                if (currentLineIndex > 0)
+                {
+                    var lastline = cachedInputTextGenerator.lines[currentLineIndex - 1];
+                    startPosition.y += extents.yMax - (lastline.BaseLine + lastline.OffsetY);
+                }
+
+                var firstChar = cachedInputTextGenerator.characters[m_DrawStart];
+                startPosition.x += extents.xMin - (firstChar.VertexQuad[0].position.x + firstChar.MinX);
+            }
 
             for (int i = 0; i < m_CursorVerts.Length; i++)
                 m_CursorVerts[i].color = caretColor;
@@ -2261,7 +2314,7 @@ namespace NUI
             // Multiple display support only when not the main display. For display 0 the reported
             // resolution is always the desktops resolution since its part of the display API,
             // so we use the standard none multiple display method. (case 741751)
-            int displayIndex = m_TextComponent.canvas.targetDisplay;
+            int displayIndex = textComponent.canvas.targetDisplay;
             if (displayIndex > 0 && displayIndex < Display.displays.Length)
                 screenHeight = Display.displays[displayIndex].renderingHeight;
 
@@ -2296,8 +2349,8 @@ namespace NUI
 
         private void GenerateHightlight(VertexHelper vbo, Vector2 roundingOffset)
         {
-            int startChar = Mathf.Max(0, caretPositionInternal - m_DrawStart);
-            int endChar = Mathf.Max(0, caretSelectPositionInternal - m_DrawStart);
+            int startChar = Mathf.Max(0, caretPositionInternal);
+            int endChar = Mathf.Max(0, caretSelectPositionInternal);
 
             // Ensure pos is always less then selPos to make the code simpler
             if (startChar > endChar)
@@ -2306,9 +2359,11 @@ namespace NUI
                 startChar = endChar;
                 endChar = temp;
             }
+            startChar = Mathf.Max(m_DrawStart, startChar);
+            endChar = Mathf.Min(m_DrawEnd, endChar);
 
             endChar -= 1;
-            NTextGenerator gen = m_TextComponent.cachedTextGenerator;
+            NTextGenerator gen = textComponent.cachedTextGenerator;
 
             if (gen.lineCount <= 0)
                 return;
@@ -2321,7 +2376,7 @@ namespace NUI
             vert.uv0 = Vector2.zero;
             vert.color = selectionColor;
 
-            float height = m_TextComponent.font.lineHeight;
+            float height = textComponent.font.lineHeight;
 
             //if (m_TextComponent.resizeTextForBestFit)
             //	height = gen.fontSizeUsedForBestFit / m_TextComponent.pixelsPerUnit;
@@ -2336,6 +2391,20 @@ namespace NUI
             //{
             //	height = cachedInputTextGenerator.fontSizeUsedForBestFit;
             //}
+            Vector3 startPos = Vector3.zero;
+            if (m_DrawStart > 0)
+            {
+                var extents = textComponent.rectTransform.rect;
+                int drawStartLine = DetermineCharacterLine(m_DrawStart, gen);
+                if (drawStartLine > 0)
+                {
+                    var lastline = cachedInputTextGenerator.lines[drawStartLine - 1];
+                    startPos.y = extents.yMax - (lastline.BaseLine + lastline.OffsetY);
+                }
+
+                var firstChar = cachedInputTextGenerator.characters[m_DrawStart];
+                startPos.x = extents.xMin - (firstChar.VertexQuad[0].position.x + firstChar.MinX);
+            }
 
             int currentChar = startChar;
             while (currentChar <= endChar && currentChar < gen.characterCount)
@@ -2350,20 +2419,20 @@ namespace NUI
                     Vector2 endPosition = new Vector2((endCharInfo.VertexQuad[0].position.x + endCharInfo.Advance), startPosition.y - lineHeight);
 
                     // Checking xMin as well due to text generator not setting possition if char is not rendered.
-                    if (endPosition.x > m_TextComponent.rectTransform.rect.xMax || endPosition.x < m_TextComponent.rectTransform.rect.xMin)
-                        endPosition.x = m_TextComponent.rectTransform.rect.xMax;
+                    if (endPosition.x > textComponent.rectTransform.rect.xMax || endPosition.x < textComponent.rectTransform.rect.xMin)
+                        endPosition.x = textComponent.rectTransform.rect.xMax;
 
                     var startIndex = vbo.currentVertCount;
-                    vert.position = new Vector3(startPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset;
+                    vert.position = new Vector3(startPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset + startPos;
                     vbo.AddVert(vert);
 
-                    vert.position = new Vector3(endPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset;
+                    vert.position = new Vector3(endPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset + startPos;
                     vbo.AddVert(vert);
 
-                    vert.position = new Vector3(endPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset;
+                    vert.position = new Vector3(endPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset + startPos;
                     vbo.AddVert(vert);
 
-                    vert.position = new Vector3(startPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset;
+                    vert.position = new Vector3(startPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset + startPos;
                     vbo.AddVert(vert);
 
                     vbo.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
@@ -2471,7 +2540,7 @@ namespace NUI
 
         public void ActivateInputField()
         {
-            if (m_TextComponent == null || m_TextComponent.font == null || !IsActive() || !IsInteractable())
+            if (textComponent == null || textComponent.font == null || !IsActive() || !IsInteractable())
                 return;
 
             if (isFocused)
@@ -2526,9 +2595,9 @@ namespace NUI
             UpdateLabel();
         }
 
-        public override void OnSelect(BaseEventData eventData)
+        public virtual void OnSelect(BaseEventData eventData)
         {
-            base.OnSelect(eventData);
+            //base.OnSelect(eventData);
 
             if (shouldActivateOnSelect)
                 ActivateInputField();
@@ -2554,18 +2623,18 @@ namespace NUI
             if (m_Placeholder != null)
                 m_Placeholder.enabled = string.IsNullOrEmpty(m_Text);
 
-            if (m_TextComponent != null && IsInteractable())
+            if (textComponent != null && IsInteractable())
             {
                 if (m_WasCanceled)
                     text = m_OriginalText;
+
+                SendOnSubmit();
 
                 if (m_Keyboard != null)
                 {
                     m_Keyboard.active = false;
                     m_Keyboard = null;
                 }
-
-                //SendOnSubmit();
 
                 // modify by niehong
                 //m_CaretPosition = m_CaretSelectPosition = 0;
@@ -2576,10 +2645,10 @@ namespace NUI
             MarkGeometryAsDirty();
         }
 
-        public override void OnDeselect(BaseEventData eventData)
+        public virtual void OnDeselect(BaseEventData eventData)
         {
             DeactivateInputField();
-            base.OnDeselect(eventData);
+            //base.OnDeselect(eventData);
         }
 
         public virtual void OnSubmit(BaseEventData eventData)
@@ -2697,91 +2766,90 @@ namespace NUI
             contentType = ContentType.Custom;
         }
 
-        protected override void DoStateTransition(SelectionState state, bool instant)
-        {
-            if (m_HasDoneFocusTransition)
-                state = SelectionState.Highlighted;
-            else if (state == SelectionState.Pressed)
-                m_HasDoneFocusTransition = true;
+        //protected override void DoStateTransition(SelectionState state, bool instant)
+        //{
+        //    if (m_HasDoneFocusTransition)
+        //        state = SelectionState.Highlighted;
+        //    else if (state == SelectionState.Pressed)
+        //        m_HasDoneFocusTransition = true;
 
-            base.DoStateTransition(state, instant);
-        }
+        //    base.DoStateTransition(state, instant);
+        //}
 
         void EnforceTextHOverflow()
         {
-            if (m_TextComponent != null)
+            if (textComponent != null)
             {
-                m_TextComponent.horizontalOverflow = HorizontalWrapMode.Wrap;
                 if (multiLine)
-                    m_TextComponent.SingleLine = false;
+                    textComponent.horizontalOverflow = HorizontalWrapMode.Wrap;
                 else
-                    m_TextComponent.SingleLine = true;
-                m_TextComponent.supportRichText = false;
+                    textComponent.horizontalOverflow = HorizontalWrapMode.Overflow;
+                textComponent.supportRichText = false;
             }
         }
 
         /// <summary>
         /// See ILayoutElement.CalculateLayoutInputHorizontal.
         /// </summary>
-        public virtual void CalculateLayoutInputHorizontal() { }
+        //public virtual void CalculateLayoutInputHorizontal() { }
 
         /// <summary>
         /// See ILayoutElement.CalculateLayoutInputVertical.
         /// </summary>
-        public virtual void CalculateLayoutInputVertical() { }
+        //public virtual void CalculateLayoutInputVertical() { }
 
         /// <summary>
         /// See ILayoutElement.minWidth.
         /// </summary>
-        public virtual float minWidth { get { return 0; } }
+        //public virtual float minWidth { get { return 0; } }
 
         /// <summary>
         /// Get the displayed with of all input characters.
         /// </summary>
-        public virtual float preferredWidth
-        {
-            get
-            {
-                if (textComponent == null)
-                    return 0;
-                var settings = textComponent.GetGenerationSettings(Vector2.zero);
-                return textComponent.cachedTextGeneratorForLayout.GetPreferredWidth(m_Text, settings) / textComponent.pixelsPerUnit;
-            }
-        }
+        //public virtual float preferredWidth
+        //{
+        //    get
+        //    {
+        //        if (textComponent == null)
+        //            return 0;
+        //        var settings = textComponent.GetGenerationSettings(Vector2.zero);
+        //        return textComponent.cachedTextGeneratorForLayout.GetPreferredWidth(m_Text, settings) / textComponent.pixelsPerUnit;
+        //    }
+        //}
 
         /// <summary>
         /// See ILayoutElement.flexibleWidth.
         /// </summary>
-        public virtual float flexibleWidth { get { return -1; } }
+        //public virtual float flexibleWidth { get { return -1; } }
 
         /// <summary>
         /// See ILayoutElement.minHeight.
         /// </summary>
-        public virtual float minHeight { get { return 0; } }
+        //public virtual float minHeight { get { return 0; } }
 
         /// <summary>
         /// Get the height of all the text if constrained to the height of the RectTransform.
         /// </summary>
-        public virtual float preferredHeight
-        {
-            get
-            {
-                if (textComponent == null)
-                    return 0;
-                var settings = textComponent.GetGenerationSettings(new Vector2(textComponent.rectTransform.rect.size.x, 0.0f));
-                return textComponent.cachedTextGeneratorForLayout.GetPreferredHeight(m_Text, settings) / textComponent.pixelsPerUnit;
-            }
-        }
+        //public virtual float preferredHeight
+        //{
+        //    get
+        //    {
+        //        if (textComponent == null)
+        //            return 0;
+        //        var settings = textComponent.GetGenerationSettings(new Vector2(textComponent.rectTransform.rect.size.x, 0.0f));
+        //        return textComponent.cachedTextGeneratorForLayout.GetPreferredHeight(m_Text, settings) / textComponent.pixelsPerUnit;
+        //    }
+        //}
 
         /// <summary>
         /// See ILayoutElement.flexibleHeight.
         /// </summary>
-        public virtual float flexibleHeight { get { return -1; } }
+        //public virtual float flexibleHeight { get { return -1; } }
 
         /// <summary>
         /// See ILayoutElement.layoutPriority.
         /// </summary>
-        public virtual int layoutPriority { get { return 1; } }
+        //public virtual int layoutPriority { get { return 1; } }
 
 
         public int AppendLink(string text, string linkParam = null, int fontSize = 0, FontStyle? fontStyle = null, Color32? color = null, Color32? bottomColor = null, Color32? underlineColor = null, Color32? strikethroughColor = null)
@@ -2791,10 +2859,10 @@ namespace NUI
             var element = TextElementPool.Get();
             element.Text = text;
             element.LinkParam = linkParam;
-            element.TopColor = null == color ? (Color32)m_TextComponent.color : color.Value;
+            element.TopColor = null == color ? (Color32)textComponent.color : color.Value;
             element.BottomColor = null == bottomColor ? element.TopColor : bottomColor.Value;
-            element.FontSize = fontSize <= 0 ? m_TextComponent.fontSize : fontSize;
-            element.FontStyle = null == fontStyle ? m_TextComponent.fontStyle : fontStyle.Value;
+            element.FontSize = fontSize <= 0 ? textComponent.fontSize : fontSize;
+            element.FontStyle = null == fontStyle ? textComponent.fontStyle : fontStyle.Value;
             element.StrikethroughColor = strikethroughColor;
             element.UnderlineColor = underlineColor;
             element.CustomCharTag = CustomRichTag;
@@ -2815,9 +2883,9 @@ namespace NUI
             element.SpriteScale = spriteScale;
             element.SpriteAlign = align;
             element.TopColor = element.BottomColor = Color.white;
-            int defaultAnimLength = null == m_TextComponent.SpritePackage ? m_TextComponent.DefaultAnimLength : m_TextComponent.SpritePackage.DefaultAnimLength;
+            int defaultAnimLength = null == textComponent.SpritePackage ? textComponent.DefaultAnimLength : textComponent.SpritePackage.DefaultAnimLength;
             element.AnimLength = 0 == animLength ? defaultAnimLength : animLength;
-            int defaultAnimFrame = null == m_TextComponent.SpritePackage ? m_TextComponent.DefaultAnimFrame : m_TextComponent.SpritePackage.DefaultAnimFrame;
+            int defaultAnimFrame = null == textComponent.SpritePackage ? textComponent.DefaultAnimFrame : textComponent.SpritePackage.DefaultAnimFrame;
             element.AnimFrame = 0 == animFrame ? defaultAnimFrame : animFrame;
             element.CustomCharTag = CustomRichTag;
             CustomElements[CustomRichTag] = element;
@@ -2835,10 +2903,10 @@ namespace NUI
             var element = TextElementPool.Get();
             element.Text = text;
             element.LinkParam = linkParam;
-            element.TopColor = null == color ? (Color32)m_TextComponent.color : color.Value;
+            element.TopColor = null == color ? (Color32)textComponent.color : color.Value;
             element.BottomColor = null == bottomColor ? element.TopColor : bottomColor.Value;
-            element.FontSize = fontSize <= 0 ? m_TextComponent.fontSize : fontSize;
-            element.FontStyle = null == fontStyle ? m_TextComponent.fontStyle : fontStyle.Value;
+            element.FontSize = fontSize <= 0 ? textComponent.fontSize : fontSize;
+            element.FontStyle = null == fontStyle ? textComponent.fontStyle : fontStyle.Value;
             element.StrikethroughColor = strikethroughColor;
             element.UnderlineColor = underlineColor;
             element.CustomCharTag = CustomRichTag;
@@ -2861,9 +2929,9 @@ namespace NUI
             element.SpriteScale = spriteScale;
             element.SpriteAlign = align;
             element.TopColor = element.BottomColor = Color.white;
-            int defaultAnimLength = null == m_TextComponent.SpritePackage ? m_TextComponent.DefaultAnimLength : m_TextComponent.SpritePackage.DefaultAnimLength;
+            int defaultAnimLength = null == textComponent.SpritePackage ? textComponent.DefaultAnimLength : textComponent.SpritePackage.DefaultAnimLength;
             element.AnimLength = 0 == animLength ? defaultAnimLength : animLength;
-            int defaultAnimFrame = null == m_TextComponent.SpritePackage ? m_TextComponent.DefaultAnimFrame : m_TextComponent.SpritePackage.DefaultAnimFrame;
+            int defaultAnimFrame = null == textComponent.SpritePackage ? textComponent.DefaultAnimFrame : textComponent.SpritePackage.DefaultAnimFrame;
             element.AnimFrame = 0 == animFrame ? defaultAnimFrame : animFrame;
             element.CustomCharTag = CustomRichTag;
             CustomElements[CustomRichTag] = element;
@@ -2940,10 +3008,10 @@ namespace NUI
                     {
                         var element = TextElementPool.Get();
                         element.Text = str;
-                        element.TopColor = m_TextComponent.color;
+                        element.TopColor = textComponent.color;
                         element.BottomColor = element.TopColor;
-                        element.FontStyle = m_TextComponent.fontStyle;
-                        element.FontSize = m_TextComponent.fontSize;
+                        element.FontStyle = textComponent.fontStyle;
+                        element.FontSize = textComponent.fontSize;
                         TextElements.Insert(i, element);
                         m_Text = m_Text.Insert(txtCharet, str);
                         return;
@@ -2957,12 +3025,12 @@ namespace NUI
             {
                 var element = TextElementPool.Get();
                 element.Text = str;
-                element.TopColor = m_TextComponent.color;
+                element.TopColor = textComponent.color;
                 element.BottomColor = element.TopColor;
-                element.FontStyle = m_TextComponent.fontStyle;
-                element.FontSize = m_TextComponent.fontSize;
+                element.FontStyle = textComponent.fontStyle;
+                element.FontSize = textComponent.fontSize;
                 TextElements.Add(element);
-                m_Text = str;
+                m_Text += str;
             }
         }
 
@@ -3047,6 +3115,98 @@ namespace NUI
             foreach (var e in CustomElements)
                 TextElementPool.Release(e.Value);
             CustomElements.Clear();
+        }
+
+        public bool IsInteractable()
+        {
+            return raycastTarget;
+        }
+
+        UIVertex[] vertexQuad = new UIVertex[4];
+        protected override void OnPopulateMesh(VertexHelper vh)
+        {
+            //if (Populate())
+            //{
+            ProcessMaterial();
+
+            if (this.gameObject.activeInHierarchy && this.enabled && !_coAnimation)
+                StartCoroutine(UpdateSprite());
+            //}
+
+            vh.Clear();
+
+            Vector3 startPos = new Vector3();
+            var extents = textComponent.rectTransform.rect ;
+            if (m_DrawStart > 0)
+            {
+                int currentLineIndex = DetermineCharacterLine(m_DrawStart, cachedInputTextGenerator);
+                if (currentLineIndex > 0)
+                {
+                    var lastline = cachedInputTextGenerator.lines[currentLineIndex - 1];
+                    startPos.y = extents.yMax - (lastline.BaseLine + lastline.OffsetY);
+                }
+
+                var firstChar = cachedInputTextGenerator.characters[m_DrawStart];
+                startPos.x = extents.xMin - (firstChar.VertexQuad[0].position.x + firstChar.MinX);
+
+                for (int i = m_DrawStart; i < m_DrawEnd; i++)
+                {
+                    if (!cachedInputTextGenerator.characters[i].IsImage())
+                    {
+                        Array.Copy(cachedInputTextGenerator.characters[i].VertexQuad, vertexQuad, 4);
+                        vertexQuad[0].position += startPos;
+                        vertexQuad[1].position += startPos;
+                        vertexQuad[2].position += startPos;
+                        vertexQuad[3].position += startPos;
+                        vh.AddUIVertexQuad(vertexQuad);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = m_DrawStart; i < m_DrawEnd; i++)
+                {
+                    if (!cachedInputTextGenerator.characters[i].IsImage())
+                    {
+                        vh.AddUIVertexQuad(cachedInputTextGenerator.characters[i].VertexQuad);
+                    }
+                }
+            }
+
+            foreach (var glyph in cachedInputTextGenerator.EffectGlyphs)
+            {
+                Array.Copy(glyph.VertexQuad, vertexQuad, 4);
+                vertexQuad[0].position += startPos;
+                vertexQuad[1].position += startPos;
+                vertexQuad[2].position += startPos;
+                vertexQuad[3].position += startPos;
+
+                if ((vertexQuad[0].position.x > extents.xMin && vertexQuad[0].position.x < extents.xMax && vertexQuad[0].position.y > extents.yMin && vertexQuad[0].position.y < extents.yMax) ||
+                    (vertexQuad[2].position.x > extents.xMin && vertexQuad[2].position.x < extents.xMax && vertexQuad[2].position.y > extents.yMin && vertexQuad[2].position.y < extents.yMax) )
+                {
+                    Vector3 position = vertexQuad[0].position;
+                    position.x = Mathf.Max(extents.xMin, position.x);
+                    position.x = Mathf.Min(extents.xMax, position.x);
+                    vertexQuad[0].position = position;
+
+                    position = vertexQuad[1].position;
+                    position.x = Mathf.Max(extents.xMin, position.x);
+                    position.x = Mathf.Min(extents.xMax, position.x);
+                    vertexQuad[1].position = position;
+
+                    position = vertexQuad[2].position;
+                    position.x = Mathf.Max(extents.xMin, position.x);
+                    position.x = Mathf.Min(extents.xMax, position.x);
+                    vertexQuad[2].position = position;
+
+                    position = vertexQuad[3].position;
+                    position.x = Mathf.Max(extents.xMin, position.x);
+                    position.x = Mathf.Min(extents.xMax, position.x);
+                    vertexQuad[3].position = position;
+
+                    vh.AddUIVertexQuad(vertexQuad);
+                }
+            }
         }
     }
 }

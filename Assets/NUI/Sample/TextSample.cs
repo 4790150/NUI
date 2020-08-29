@@ -10,9 +10,6 @@ using System;
 public class TextSample : MonoBehaviour {
     private NText text;
     private NInputField input;
-    private InputField input1;
-    private InputField input2;
-    private InputField input3;
 
 	// Use this for initialization
 	void Start () {
@@ -24,9 +21,6 @@ public class TextSample : MonoBehaviour {
         transform.Find("ButtonInsertText").GetComponent<Button>().onClick.AddListener(OnBtnInsertText);
         transform.Find("ButtonInsertLink").GetComponent<Button>().onClick.AddListener(OnBtnInsertLink);
         transform.Find("ButtonInsertImage").GetComponent<Button>().onClick.AddListener(OnBtnInsertImage);
-        input1 = transform.Find("InputField1").GetComponent<InputField>();
-        input2 = transform.Find("InputField1").GetComponent<InputField>();
-        input3 = transform.Find("InputField1").GetComponent<InputField>();
         text.OnLink = OnLink;
     }
 
@@ -47,17 +41,17 @@ public class TextSample : MonoBehaviour {
 
     void OnBtnInsertText()
     {
-        input.InsertLink("insert text", Int32Parse(input1.text), null);
+        input.InsertLink("insert text", input.caretPosition, null);
     }
 
     void OnBtnInsertLink()
     {
-        input.InsertLink("insert link", Int32Parse(input2.text), "param2");
+        input.InsertLink("insert link", input.caretPosition, "param2");
     }
 
     void OnBtnInsertImage()
     {
-        input.InsertImage(0, Int32Parse(input3.text), animLength: 5);
+        input.InsertImage(0, input.caretPosition, animLength: 5);
     }
 
     void OnLink(string param)

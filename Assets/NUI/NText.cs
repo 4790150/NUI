@@ -396,13 +396,11 @@ namespace NUI
             }
         }
 
-        public bool SingleLine;
-
         private bool m_HasGenerated;
         private string _lastText;
         private NTextGenerationSettings _lastSettings;
         public new NTextGenerator cachedTextGenerator = new NTextGenerator();
-        public Dictionary<int, NTextElement> CustomElements = null;
+        public Dictionary<int, NTextElement> CustomElements = new Dictionary<int, NTextElement>();
         private List<NTextElement> textElements = new List<NTextElement>();
         private static List<NTextElement> s_textElements = new List<NTextElement>();
 
@@ -623,7 +621,6 @@ namespace NUI
                 ParagraphIndent = ParagraphIndent,
                 OverflowEllipsis = OverflowEllipsis,
                 maxOverflowWidth = MaxOverflowWidth,
-                SingleLine = SingleLine,
             };
             return generationSettings;
         }
@@ -751,7 +748,7 @@ namespace NUI
 
         private bool _dataDirty = false;
 
-        private bool _coAnimation = false;
+        protected bool _coAnimation = false;
         protected IEnumerator UpdateSprite()
         {
             _coAnimation = true;
@@ -848,7 +845,7 @@ namespace NUI
         }
 
         private int _linkClick = -1;
-        public void OnPointerDown(PointerEventData eventData)
+        public virtual void OnPointerDown(PointerEventData eventData)
         {
             Vector2 _eventPosition;
             RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)transform, eventData.position, eventData.pressEventCamera, out _eventPosition);
@@ -896,7 +893,7 @@ namespace NUI
             }
         }
 
-        public void OnPointerUp(PointerEventData eventData)
+        public virtual void OnPointerUp(PointerEventData eventData)
         {
             if (_linkClick >= 0 && _linkClick < Links.Count)
             {

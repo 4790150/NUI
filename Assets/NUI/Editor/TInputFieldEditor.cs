@@ -9,10 +9,10 @@ namespace NUI
 {
     [CanEditMultipleObjects]
     [CustomEditor(typeof(NInputField), true)]
-    public class NInputFieldEditor : SelectableEditor
+    public class NInputFieldEditor : NTextEditor
     {
-        SerializedProperty m_TextComponent;
-        SerializedProperty m_Text;
+        //SerializedProperty m_TextComponent;
+        //SerializedProperty m_Text;
         SerializedProperty m_ContentType;
         SerializedProperty m_LineType;
         SerializedProperty m_InputType;
@@ -29,8 +29,8 @@ namespace NUI
         protected override void OnEnable()
         {
             base.OnEnable();
-            m_TextComponent = serializedObject.FindProperty("m_TextComponent");
-            m_Text = serializedObject.FindProperty("m_Text");
+            //m_TextComponent = serializedObject.FindProperty("m_TextComponent");
+            //m_Text = serializedObject.FindProperty("m_Text");
             m_ContentType = serializedObject.FindProperty("m_ContentType");
             m_LineType = serializedObject.FindProperty("m_LineType");
             m_InputType = serializedObject.FindProperty("m_InputType");
@@ -53,11 +53,11 @@ namespace NUI
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.PropertyField(m_TextComponent);
+            //EditorGUILayout.PropertyField(m_TextComponent);
 
-            EditorGUI.BeginDisabledGroup(m_TextComponent == null || m_TextComponent.objectReferenceValue == null);
+            //EditorGUI.BeginDisabledGroup(m_TextComponent == null || m_TextComponent.objectReferenceValue == null);
 
-            EditorGUILayout.PropertyField(m_Text);
+            //EditorGUILayout.PropertyField(m_Text);
             EditorGUILayout.PropertyField(m_CharacterLimit);
 
             EditorGUILayout.Space();

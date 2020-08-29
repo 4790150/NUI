@@ -92,7 +92,6 @@ namespace NUI
         public int ParagraphIndent;
         public bool OverflowEllipsis;
         public float maxOverflowWidth;
-        public bool SingleLine;
 
         private bool CompareColors(Color left, Color right)
         {
@@ -114,7 +113,7 @@ namespace NUI
                 ReferenceEquals(this.font, other.font) && ReferenceEquals(this.Sprites, other.Sprites) && this.DefaultAnimLength == other.DefaultAnimLength && this.DefaultAnimFrame == other.DefaultAnimFrame &&
                 Mathf.Approximately(this.DefaultSpriteScale, other.DefaultSpriteScale) && this.DefaultSpriteAlign == other.DefaultSpriteAlign && this.GradientColor == other.GradientColor && CompareColors(this.BottomColor, other.BottomColor) &&
                 this.Outline == other.Outline && CompareColors(this.OutlineColor, other.OutlineColor) && Mathf.Approximately(this.OutlineSize, other.OutlineSize) && this.ParagraphIndent == other.ParagraphIndent &&
-                this.OverflowEllipsis == other.OverflowEllipsis && Mathf.Approximately(this.maxOverflowWidth, other.maxOverflowWidth) && this.SingleLine == other.SingleLine;
+                this.OverflowEllipsis == other.OverflowEllipsis && Mathf.Approximately(this.maxOverflowWidth, other.maxOverflowWidth);
         }
 
         public int SpriteLength { get { return null == Sprites ? 0 : Sprites.Length; } }
@@ -229,13 +228,6 @@ namespace NUI
                         var ch = txt[charIndex];
                         if (ch == '\r' || ch == '\n')
                         {
-                            if (settings.SingleLine)
-                            {
-                                CalcLineHeight(lines.Count - 1, settings);
-                                discardAfter = true;
-                                break;
-                            }
-
                             var newGlyph = TextGlyphPool.Get();
                             newGlyph.Char = ch;
                             newGlyph.CustomCharTag = element.CustomCharTag;
@@ -273,13 +265,6 @@ namespace NUI
                             if ((settings.horizontalOverflow == HorizontalWrapMode.Wrap && lineRect.Width + info.advance > settings.generationExtents.x - lineRect.ParagraphIndent) ||
                                 (settings.horizontalOverflow == HorizontalWrapMode.Overflow && settings.maxOverflowWidth > 0 && lineRect.Width + info.advance > settings.maxOverflowWidth - lineRect.ParagraphIndent))
                             {
-                                if (settings.SingleLine)
-                                {
-                                    CalcLineHeight(lines.Count - 1, settings);
-                                    discardAfter = true;
-                                    break;
-                                }
-
                                 var lastLine = lineRect;
                                 lineRect = TextLinePool.Get();
                                 lineRect.startCharIdx = characters.Count;
@@ -370,13 +355,6 @@ namespace NUI
                     if ((settings.horizontalOverflow == HorizontalWrapMode.Wrap && lineRect.Width + spriteWidth > settings.generationExtents.x - lineRect.ParagraphIndent) ||
                         (settings.horizontalOverflow == HorizontalWrapMode.Overflow && settings.maxOverflowWidth > 0 && lineRect.Width + spriteWidth > settings.maxOverflowWidth - lineRect.ParagraphIndent))
                     {
-                        if (settings.SingleLine)
-                        {
-                            CalcLineHeight(lines.Count - 1, settings);
-                            discardAfter = true;
-                            break;
-                        }
-
                         lineRect = TextLinePool.Get();
                         lineRect.startCharIdx = characters.Count;
                         lines.Add(lineRect);
