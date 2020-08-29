@@ -7,7 +7,7 @@ namespace NUI
     [ExecuteInEditMode]
     public class NTextImage : MaskableGraphic
     {
-        public List<NRichTextGlyph> ImgGlyphs = new List<NRichTextGlyph>();
+        public List<NTextGlyph> ImgGlyphs = new List<NTextGlyph>();
         public Texture Texture;
 
         protected NTextImage()

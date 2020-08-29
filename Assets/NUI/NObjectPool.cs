@@ -104,7 +104,7 @@ namespace NUI
 
     public static class TextLinePool
     {
-        private static readonly NObjectPool<NTextLineRect> LinePool = new NObjectPool<NTextLineRect>(() => new NTextLineRect(), (line) =>
+        private static readonly NObjectPool<NTextLine> LinePool = new NObjectPool<NTextLine>(() => new NTextLine(), (line) =>
         {
             line.Width = 0;
             line.Height = 0;
@@ -116,13 +116,13 @@ namespace NUI
             line.endCharIdx = 0;
         });
 
-        public static NTextLineRect Get() { return LinePool.Get(); }
-        public static void Release(NTextLineRect line) { LinePool.Release(line); }
+        public static NTextLine Get() { return LinePool.Get(); }
+        public static void Release(NTextLine line) { LinePool.Release(line); }
     }
 
     public static class TextGlyphPool
     { 
-        private static readonly NObjectPool<NRichTextGlyph> GlyphPool = new NObjectPool<NRichTextGlyph>(() => new NRichTextGlyph(), (glyph) =>
+        private static readonly NObjectPool<NTextGlyph> GlyphPool = new NObjectPool<NTextGlyph>(() => new NTextGlyph(), (glyph) =>
         {
             glyph.Char = '\0';
             glyph.MinX = 0;
@@ -136,13 +136,13 @@ namespace NUI
             glyph.CustomCharTag = 0;
         });
 
-        public static NRichTextGlyph Get() { return GlyphPool.Get(); }
-        public static void Release(NRichTextGlyph glyph) { GlyphPool.Release(glyph); }
+        public static NTextGlyph Get() { return GlyphPool.Get(); }
+        public static void Release(NTextGlyph glyph) { GlyphPool.Release(glyph); }
     }
 
     public static class TextElementPool
     {
-        public static NObjectPool<NRichTextElement> ElementPool = new NObjectPool<NRichTextElement>(() => new NRichTextElement(), (NRichTextElement element) =>
+        public static NObjectPool<NTextElement> ElementPool = new NObjectPool<NTextElement>(() => new NTextElement(), (NTextElement element) =>
         {
             element.Text = string.Empty;
             element.LinkParam = null;
@@ -158,7 +158,7 @@ namespace NUI
             element.CustomCharTag = 0;
         });
 
-        public static NRichTextElement Get() { return ElementPool.Get(); }
-        public static void Release(NRichTextElement element) { ElementPool.Release(element); }
+        public static NTextElement Get() { return ElementPool.Get(); }
+        public static void Release(NTextElement element) { ElementPool.Release(element); }
     }
 }

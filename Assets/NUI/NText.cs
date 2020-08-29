@@ -15,7 +15,7 @@ namespace NUI
         Top
     }
 
-    public class NRichTextElement
+    public class NTextElement
     {
         public string Text;
         public string LinkParam;
@@ -35,7 +35,7 @@ namespace NUI
         public int CustomCharTag;
     }
 
-    public class NRichTextGlyph
+    public class NTextGlyph
     {
         public char Char;
         public UIVertex[] VertexQuad = new UIVertex[4];
@@ -56,7 +56,7 @@ namespace NUI
         }
     }
 
-    public class NRichTextAnim
+    public class NTextAnim
     {
         public int StartSpriteIndex;
         public int LastSpriteIndex;
@@ -64,7 +64,7 @@ namespace NUI
         public int AnimFrame;
     }
 
-    public class NTextLineRect
+    public class NTextLine
     {
         public float Width;
         public float Height;
@@ -402,9 +402,9 @@ namespace NUI
         private string _lastText;
         private NTextGenerationSettings _lastSettings;
         public new NTextGenerator cachedTextGenerator = new NTextGenerator();
-        public Dictionary<int, NRichTextElement> CustomElements = null;
-        private List<NRichTextElement> textElements = new List<NRichTextElement>();
-        private static List<NRichTextElement> s_textElements = new List<NRichTextElement>();
+        public Dictionary<int, NTextElement> CustomElements = null;
+        private List<NTextElement> textElements = new List<NTextElement>();
+        private static List<NTextElement> s_textElements = new List<NTextElement>();
 
         protected NText()
         {
@@ -542,27 +542,27 @@ namespace NUI
                 pair.Value.SetAllDirty();
         }
 
-        public List<NRichTextGlyph> Characters
+        public List<NTextGlyph> Characters
         {
             get { return cachedTextGenerator.characters; }
         }
 
-        public List<NRichTextGlyph> ImgGlyphs
+        public List<NTextGlyph> ImgGlyphs
         {
             get { return cachedTextGenerator.ImgGlyphs; }
         }
 
-        private List<NRichTextGlyph> TxtGlyphs
+        private List<NTextGlyph> TxtGlyphs
         {
             get { return cachedTextGenerator.TxtGlyphs; }
         }
 
-        private List<NRichTextGlyph> EffectGlyphs
+        private List<NTextGlyph> EffectGlyphs
         {
             get { return cachedTextGenerator.EffectGlyphs; }
         }
 
-        private Dictionary<int, NRichTextAnim> AnimGlyphs
+        private Dictionary<int, NTextAnim> AnimGlyphs
         {
             get { return cachedTextGenerator.AnimGlyphs; }
         }
@@ -572,13 +572,13 @@ namespace NUI
             get { return cachedTextGenerator.Links; }
         }
 
-        public List<NTextLineRect> lines
+        public List<NTextLine> lines
         {
             get { return cachedTextGenerator.lines; }
         }
 
 
-        public List<NRichTextGlyph> characters
+        public List<NTextGlyph> characters
         {
             get { return cachedTextGenerator.characters; }
         }
@@ -635,7 +635,7 @@ namespace NUI
             return _dataDirty = Populate(text, settings, textElements) | _dataDirty;
         }
 
-        protected bool Populate(string text, NTextGenerationSettings settings, List<NRichTextElement> elements)
+        protected bool Populate(string text, NTextGenerationSettings settings, List<NTextElement> elements)
         {
             if (m_HasGenerated && settings.Equals(_lastSettings) && text == _lastText)
                 return false;
@@ -779,7 +779,7 @@ namespace NUI
 
                         if (glyphIndex < Characters.Count)
                         {
-                            NRichTextGlyph imgGlyph = Characters[glyphIndex];
+                            NTextGlyph imgGlyph = Characters[glyphIndex];
 
                             UIVertex vertex0 = imgGlyph.VertexQuad[0];
                             UIVertex vertex1 = imgGlyph.VertexQuad[1];

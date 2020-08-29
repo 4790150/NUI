@@ -126,13 +126,13 @@ namespace NUI
         public float RealTextHeight;
         public StringBuilder RealTextBuilder = new StringBuilder();
 
-        public List<NRichTextGlyph> characters = new List<NRichTextGlyph>();
-        public readonly List<NRichTextGlyph> ImgGlyphs = new List<NRichTextGlyph>();
-        public readonly List<NRichTextGlyph> TxtGlyphs = new List<NRichTextGlyph>();
-        public readonly List<NRichTextGlyph> EffectGlyphs = new List<NRichTextGlyph>();
-        public readonly Dictionary<int, NRichTextAnim> AnimGlyphs = new Dictionary<int, NRichTextAnim>();
+        public List<NTextGlyph> characters = new List<NTextGlyph>();
+        public readonly List<NTextGlyph> ImgGlyphs = new List<NTextGlyph>();
+        public readonly List<NTextGlyph> TxtGlyphs = new List<NTextGlyph>();
+        public readonly List<NTextGlyph> EffectGlyphs = new List<NTextGlyph>();
+        public readonly Dictionary<int, NTextAnim> AnimGlyphs = new Dictionary<int, NTextAnim>();
         public readonly List<NTextLink> Links = new List<NTextLink>();
-        public readonly List<NTextLineRect> lines = new List<NTextLineRect>();
+        public readonly List<NTextLine> lines = new List<NTextLine>();
 
         public int lineCount { get { return lines.Count; } }
         public int characterCount { get; private set; }
@@ -141,7 +141,7 @@ namespace NUI
         private float fontSpacing = 0.0f;
         private float ascent = 0.0f;
 
-        public void PopulateAlways(List<NRichTextElement> elements, NTextGenerationSettings settings)
+        public void PopulateAlways(List<NTextElement> elements, NTextGenerationSettings settings)
         {
             if (null == settings.font) return;
 
@@ -419,7 +419,7 @@ namespace NUI
                     richChar.VertexQuad[3].uv0 = new Vector2(uv.x, uv.y);
 
                     if (element.AnimFrame > 0 && element.AnimLength > 1)
-                        AnimGlyphs.Add(characters.Count, new NRichTextAnim { StartSpriteIndex = spriteIndex, AnimLength = element.AnimLength, AnimFrame = element.AnimFrame, LastSpriteIndex = spriteIndex });
+                        AnimGlyphs.Add(characters.Count, new NTextAnim { StartSpriteIndex = spriteIndex, AnimLength = element.AnimLength, AnimFrame = element.AnimFrame, LastSpriteIndex = spriteIndex });
                     characters.Add(richChar);
 
                     lineRect.Width += richChar.Advance;
@@ -526,8 +526,8 @@ namespace NUI
                 }
 
                 float lineWidth = 0.0f;
-                NRichTextGlyph glyphUnderline = null;
-                NRichTextGlyph glyphStrikethrough = null;
+                NTextGlyph glyphUnderline = null;
+                NTextGlyph glyphStrikethrough = null;
                 var imgPivot = new Vector2(0.5f, 0.5f);
                 for (int glyphIndex = thisLineRect.startCharIdx; glyphIndex < thisLineRect.endCharIdx; glyphIndex++)
                 {

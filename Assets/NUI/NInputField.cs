@@ -404,8 +404,8 @@ namespace NUI
         }
 
         private int CustomRichTag = '\xe000';
-        private Dictionary<int, NRichTextElement> CustomElements = new Dictionary<int, NRichTextElement>();
-        private List<NRichTextElement> TextElements = new List<NRichTextElement>();
+        private Dictionary<int, NTextElement> CustomElements = new Dictionary<int, NTextElement>();
+        private List<NTextElement> TextElements = new List<NTextElement>();
 
         public bool isFocused
         {
@@ -1013,7 +1013,7 @@ namespace NUI
                 if (i >= gen.characterCountVisible)
                     break;
 
-                NRichTextGlyph charInfo = gen.characters[i];
+                NTextGlyph charInfo = gen.characters[i];
                 Vector2 charPos = charInfo.VertexQuad[0].position / m_TextComponent.pixelsPerUnit;
 
                 float distToCharStart = pos.x - charPos.x;
@@ -1517,7 +1517,7 @@ namespace NUI
             if (originalPos >= cachedInputTextGenerator.characters.Count)
                 return 0;
 
-            NRichTextGlyph originChar = cachedInputTextGenerator.characters[originalPos];
+            NTextGlyph originChar = cachedInputTextGenerator.characters[originalPos];
             int originLine = DetermineCharacterLine(originalPos, cachedInputTextGenerator);
 
             // We are on the last line return last character
@@ -1561,7 +1561,7 @@ namespace NUI
             if (originalPos >= cachedInputTextGenerator.characterCountVisible)
                 return RealTextLength;
 
-            NRichTextGlyph originChar = cachedInputTextGenerator.characters[originalPos];
+            NTextGlyph originChar = cachedInputTextGenerator.characters[originalPos];
             int originLine = DetermineCharacterLine(originalPos, cachedInputTextGenerator);
 
             // We are on the last line return last character
@@ -1704,7 +1704,7 @@ namespace NUI
                     var realCaret = CharetPositionToTextIndex(caretPositionInternal);
                     var c = m_Text[realCaret - 1];
                     var length = 1;
-                    NRichTextElement e = null;
+                    NTextElement e = null;
                     if (CustomElements.TryGetValue((int)c, out e))
                     {
                         length = Mathf.Max(1, null == e.Text ? 0 : e.Text.Length);
@@ -2216,7 +2216,7 @@ namespace NUI
 
             if (adjustedPos < gen.characters.Count)
             {
-                NRichTextGlyph cursorChar = gen.characters[adjustedPos];
+                NTextGlyph cursorChar = gen.characters[adjustedPos];
                 startPosition.x = cursorChar.VertexQuad[0].position.x;
             }
 
@@ -2342,8 +2342,8 @@ namespace NUI
             {
                 if (currentChar == lastCharInLineIndex || currentChar == endChar)
                 {
-                    NRichTextGlyph startCharInfo = gen.characters[startChar];
-                    NRichTextGlyph endCharInfo = gen.characters[currentChar];
+                    NTextGlyph startCharInfo = gen.characters[startChar];
+                    NTextGlyph endCharInfo = gen.characters[currentChar];
                     float lineHeights = SumLineHeights(currentLineIndex, gen);
                     float lineHeight = cachedInputTextGenerator.lines[currentLineIndex].Height;
                     Vector2 startPosition = new Vector2(startCharInfo.VertexQuad[0].position.x, lineHeights);

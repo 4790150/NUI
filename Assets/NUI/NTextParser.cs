@@ -31,7 +31,7 @@ namespace NUI
         private static Stack<int> FontSizeStack = new Stack<int>();
 
 
-        public static List<NRichTextElement> Parse(string content, NTextGenerationSettings settings, List<NRichTextElement> elements, Dictionary<int, NRichTextElement> custom)
+        public static List<NTextElement> Parse(string content, NTextGenerationSettings settings, List<NTextElement> elements, Dictionary<int, NTextElement> custom)
         {
             ListElementCleanup(elements, custom);
 
@@ -630,7 +630,7 @@ namespace NUI
             return k_LookupStringU[(int)c];
         }
 
-        private static void ListElementCleanup(List<NRichTextElement> elements, Dictionary<int, NRichTextElement> custom)
+        private static void ListElementCleanup(List<NTextElement> elements, Dictionary<int, NTextElement> custom)
         {
             foreach (var element in elements)
             {
