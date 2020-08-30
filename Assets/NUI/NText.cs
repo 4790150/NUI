@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.U2D;
@@ -122,12 +123,12 @@ namespace NUI
             }
         }
 
-        public Dictionary<int, Texture> ImageTexture = new Dictionary<int, Texture>();
+        protected Dictionary<int, Texture> ImageTexture = new Dictionary<int, Texture>();
 
-        private Dictionary<Texture, NTextImage> _richImages = new Dictionary<Texture, NTextImage>();
+        protected Dictionary<Texture, NTextImage> _richImages = new Dictionary<Texture, NTextImage>();
 
         [SerializeField]
-        private bool _gradientColor;
+        protected bool _gradientColor;
         public bool GradientColor
         {
             get { return _gradientColor; }
@@ -142,7 +143,7 @@ namespace NUI
         }
 
         [SerializeField]
-        private Color _bottomColor;
+        protected Color _bottomColor;
         public Color BottomColor
         {
             get { return _bottomColor; }
@@ -157,7 +158,7 @@ namespace NUI
         }
 
         [SerializeField]
-        private bool _outline;
+        protected bool _outline;
         public bool Outline
         {
             get { return _outline; }
@@ -172,7 +173,7 @@ namespace NUI
         }
 
         [SerializeField]
-        private Color _outlineColor = Color.black;
+        protected Color _outlineColor = Color.black;
         public Color OutlineColor
         {
             get { return _outlineColor; }
@@ -187,7 +188,7 @@ namespace NUI
         }
 
         [SerializeField]
-        private float _outlineSize = 1f;
+        protected float _outlineSize = 1f;
         public float OutlineSize
         {
             get { return _outlineSize; }
@@ -201,7 +202,7 @@ namespace NUI
             }
         }
 
-        private static Material sDefaultEffectMaterial;
+        protected static Material sDefaultEffectMaterial;
         protected static Material defaultEffectMaterial
         {
             get
@@ -215,7 +216,7 @@ namespace NUI
         protected static Queue<Material> EffectMaterialPool = new Queue<Material>();
 
         //[SerializeField]
-        //private bool _shadow;
+        //protected bool _shadow;
         //public bool Shadow
         //{
         //    get { return _shadow; }
@@ -230,7 +231,7 @@ namespace NUI
         //}
 
         //[SerializeField]
-        //private Vector2 _shadowDistance;
+        //protected Vector2 _shadowDistance;
         //public Vector2 ShadowDistance
         //{
         //    get { return _shadowDistance; }
@@ -245,7 +246,7 @@ namespace NUI
         //}
 
         //[SerializeField]
-        //private Color _shadowColor;
+        //protected Color _shadowColor;
         //public Color ShadowColor
         //{
         //    get { return _shadowColor; }
@@ -260,7 +261,7 @@ namespace NUI
         //}
 
         [SerializeField]
-        private NTextSpritePackage _spritePackage;
+        protected NTextSpritePackage _spritePackage;
 
         public NTextSpritePackage SpritePackage
         {
@@ -276,7 +277,7 @@ namespace NUI
         }
 
         [SerializeField]
-        private Sprite[] _sprites;
+        protected Sprite[] _sprites;
         public Sprite[] Sprites
         {
             get { return _sprites; }
@@ -291,7 +292,7 @@ namespace NUI
         }
 
         [SerializeField]
-        private int _defaultAnimLength = 1;
+        protected int _defaultAnimLength = 1;
         public int DefaultAnimLength
         {
             get { return _defaultAnimLength; }
@@ -306,7 +307,7 @@ namespace NUI
         }
 
         [SerializeField]
-        private int _defaultAnimFrame = 1;
+        protected int _defaultAnimFrame = 1;
         public int DefaultAnimFrame
         {
             get { return _defaultAnimFrame; }
@@ -321,7 +322,7 @@ namespace NUI
         }
 
         [SerializeField]
-        private float _defaultSpriteScale = 1.0f;
+        protected float _defaultSpriteScale = 1.0f;
         public float DefaultSpriteScale
         {
             get { return _defaultSpriteScale; }
@@ -336,7 +337,7 @@ namespace NUI
         }
 
         [SerializeField]
-        private NVerticalAlign _defaultSpriteAlign = NVerticalAlign.Bottom;
+        protected NVerticalAlign _defaultSpriteAlign = NVerticalAlign.Bottom;
         public NVerticalAlign DefaultSpriteAlign
         {
             get { return _defaultSpriteAlign; }
@@ -352,7 +353,7 @@ namespace NUI
 
 
         [SerializeField]
-        private int _paragraphIndent;
+        protected int _paragraphIndent;
         public int ParagraphIndent
         {
             get { return _paragraphIndent; }
@@ -367,7 +368,8 @@ namespace NUI
         }
 
         [Tooltip(@"Horizontal Overflow:Wrap && Vertical Overflow:Truncate")]
-        [SerializeField] private bool _overflowEllipsis;
+        [SerializeField]
+        protected bool _overflowEllipsis;
         public bool OverflowEllipsis
         {
             get { return _overflowEllipsis; }
@@ -381,7 +383,7 @@ namespace NUI
             }
         }
 
-        [SerializeField] private float _maxOverflowWidth;
+        [SerializeField] protected float _maxOverflowWidth;
 
         public float MaxOverflowWidth
         {
@@ -396,21 +398,36 @@ namespace NUI
             }
         }
 
-        private bool m_HasGenerated;
-        private string _lastText;
-        private NTextGenerationSettings _lastSettings;
+        protected bool m_HasGenerated;
+        protected string _lastText;
+        protected NTextGenerationSettings _lastSettings;
         public new NTextGenerator cachedTextGenerator = new NTextGenerator();
         public Dictionary<int, NTextElement> CustomElements = new Dictionary<int, NTextElement>();
-        private List<NTextElement> textElements = new List<NTextElement>();
-        private static List<NTextElement> s_textElements = new List<NTextElement>();
+        protected List<NTextElement> textElements = new List<NTextElement>();
+        protected static List<NTextElement> s_textElements = new List<NTextElement>();
+
+        protected static int imageCount = 0;
+        protected static NGameObjectPool _imagePool;
 
         protected NText()
         {
             useLegacyMeshGeneration = false;
         }
 
-        private static int imageCount = 0;
-        private static NGameObjectPool _imagePool;
+
+        public override void SetAllDirty()
+        {
+            base.SetAllDirty();
+            foreach (var pair in _richImages)
+                pair.Value.SetAllDirty();
+        }
+
+        protected override void UpdateGeometry()
+        {
+            if (_linkClick < 0)
+                m_HasGenerated = false;
+            base.UpdateGeometry();
+        }
 
         protected static NGameObjectPool ImagePool
         {
@@ -428,7 +445,7 @@ namespace NUI
             }
         }
 
-        private void CreateRichImage()
+        protected void CreateRichImage()
         {
             List<NTextImage> imageList = NListPool<NTextImage>.Get();
 
@@ -533,13 +550,6 @@ namespace NUI
             NListPool<NTextImage>.Release(imageList);
         }
 
-        public override void SetAllDirty()
-        {
-            base.SetAllDirty();
-            foreach (var pair in _richImages)
-                pair.Value.SetAllDirty();
-        }
-
         public List<NTextGlyph> Characters
         {
             get { return cachedTextGenerator.characters; }
@@ -550,22 +560,22 @@ namespace NUI
             get { return cachedTextGenerator.ImgGlyphs; }
         }
 
-        private List<NTextGlyph> TxtGlyphs
+        protected List<NTextGlyph> TxtGlyphs
         {
             get { return cachedTextGenerator.TxtGlyphs; }
         }
 
-        private List<NTextGlyph> EffectGlyphs
+        protected Dictionary<int, NTextGlyph> EffectGlyphs
         {
             get { return cachedTextGenerator.EffectGlyphs; }
         }
 
-        private Dictionary<int, NTextAnim> AnimGlyphs
+        protected Dictionary<int, NTextAnim> AnimGlyphs
         {
             get { return cachedTextGenerator.AnimGlyphs; }
         }
 
-        private List<NTextLink> Links
+        protected List<NTextLink> Links
         {
             get { return cachedTextGenerator.Links; }
         }
@@ -719,7 +729,7 @@ namespace NUI
             foreach (var glyph in TxtGlyphs)
                 vh.AddUIVertexQuad(glyph.VertexQuad);
             foreach (var glyph in EffectGlyphs)
-                vh.AddUIVertexQuad(glyph.VertexQuad);
+                vh.AddUIVertexQuad(glyph.Value.VertexQuad);
         }
 
         protected override void OnEnable()
@@ -746,7 +756,7 @@ namespace NUI
             _richImages.Clear();
         }
 
-        private bool _dataDirty = false;
+        protected bool _dataDirty = false;
 
         protected bool _coAnimation = false;
         protected IEnumerator UpdateSprite()
@@ -844,7 +854,7 @@ namespace NUI
             }
         }
 
-        private int _linkClick = -1;
+        protected int _linkClick = -1;
         public virtual void OnPointerDown(PointerEventData eventData)
         {
             Vector2 _eventPosition;

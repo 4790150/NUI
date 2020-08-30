@@ -13,7 +13,7 @@ namespace NUI
         /// <summary>
         ///   <para>The base color for the text generation.</para>
         /// </summary>
-        public Color color;
+        public Color32 color;
         /// <summary>
         ///   <para>Font size.</para>
         /// </summary>
@@ -85,35 +85,26 @@ namespace NUI
         public float DefaultSpriteScale;
         public NVerticalAlign DefaultSpriteAlign;
         public bool GradientColor;
-        public Color BottomColor;
+        public Color32 BottomColor;
         public bool Outline;
-        public Color OutlineColor;
+        public Color32 OutlineColor;
         public float OutlineSize;
         public int ParagraphIndent;
         public bool OverflowEllipsis;
         public float maxOverflowWidth;
-
-        private bool CompareColors(Color left, Color right)
-        {
-            return Mathf.Approximately(left.r, right.r) && Mathf.Approximately(left.g, right.g) && Mathf.Approximately(left.b, right.b) && Mathf.Approximately(left.a, right.a);
-        }
-
-        private bool CompareVector2(Vector2 left, Vector2 right)
-        {
-            return Mathf.Approximately(left.x, right.x) && Mathf.Approximately(left.y, right.y);
-        }
+        public bool ignoreNewline;
 
         public bool Equals(NTextGenerationSettings other)
         {
-            return this.CompareColors(this.color, other.color) && this.fontSize == other.fontSize && Mathf.Approximately(this.scaleFactor, other.scaleFactor) && this.resizeTextMinSize == other.resizeTextMinSize &&
+            return this.color.Compare(other.color) && this.fontSize == other.fontSize && Mathf.Approximately(this.scaleFactor, other.scaleFactor) && this.resizeTextMinSize == other.resizeTextMinSize &&
                 this.resizeTextMaxSize == other.resizeTextMaxSize && Mathf.Approximately(this.lineSpacing, other.lineSpacing) && this.fontStyle == other.fontStyle && this.richText == other.richText &&
                 this.textAnchor == other.textAnchor && this.alignByGeometry == other.alignByGeometry && this.resizeTextForBestFit == other.resizeTextForBestFit && this.resizeTextMinSize == other.resizeTextMinSize &&
                 this.resizeTextMaxSize == other.resizeTextMaxSize && this.resizeTextForBestFit == other.resizeTextForBestFit && this.updateBounds == other.updateBounds && this.horizontalOverflow == other.horizontalOverflow &&
-                this.verticalOverflow == other.verticalOverflow && this.CompareVector2(this.generationExtents, other.generationExtents) && this.CompareVector2(this.pivot, other.pivot) &&
+                this.verticalOverflow == other.verticalOverflow && this.generationExtents.Compare(other.generationExtents) && this.pivot.Compare(other.pivot) &&
                 ReferenceEquals(this.font, other.font) && ReferenceEquals(this.Sprites, other.Sprites) && this.DefaultAnimLength == other.DefaultAnimLength && this.DefaultAnimFrame == other.DefaultAnimFrame &&
-                Mathf.Approximately(this.DefaultSpriteScale, other.DefaultSpriteScale) && this.DefaultSpriteAlign == other.DefaultSpriteAlign && this.GradientColor == other.GradientColor && CompareColors(this.BottomColor, other.BottomColor) &&
-                this.Outline == other.Outline && CompareColors(this.OutlineColor, other.OutlineColor) && Mathf.Approximately(this.OutlineSize, other.OutlineSize) && this.ParagraphIndent == other.ParagraphIndent &&
-                this.OverflowEllipsis == other.OverflowEllipsis && Mathf.Approximately(this.maxOverflowWidth, other.maxOverflowWidth);
+                Mathf.Approximately(this.DefaultSpriteScale, other.DefaultSpriteScale) && this.DefaultSpriteAlign == other.DefaultSpriteAlign && this.GradientColor == other.GradientColor && this.BottomColor.Compare(other.BottomColor) &&
+                this.Outline == other.Outline && this.OutlineColor.Compare(other.OutlineColor) && Mathf.Approximately(this.OutlineSize, other.OutlineSize) && this.ParagraphIndent == other.ParagraphIndent &&
+                this.OverflowEllipsis == other.OverflowEllipsis && Mathf.Approximately(this.maxOverflowWidth, other.maxOverflowWidth) && this.ignoreNewline == other.ignoreNewline;
         }
 
         public int SpriteLength { get { return null == Sprites ? 0 : Sprites.Length; } }
@@ -127,7 +118,7 @@ namespace NUI
 
         public List<NTextGlyph> characters = new List<NTextGlyph>();
         public readonly List<NTextGlyph> TxtGlyphs = new List<NTextGlyph>();
-        public readonly List<NTextGlyph> EffectGlyphs = new List<NTextGlyph>();
+        public readonly Dictionary<int, NTextGlyph> EffectGlyphs = new Dictionary<int, NTextGlyph>();
         public readonly Dictionary<int, NTextGlyph> ImgGlyphs = new Dictionary<int, NTextGlyph>();
         public readonly Dictionary<int, NTextAnim> AnimGlyphs = new Dictionary<int, NTextAnim>();
         public readonly List<NTextLink> Links = new List<NTextLink>();
@@ -156,7 +147,7 @@ namespace NUI
             TxtGlyphs.Clear();
 
             foreach (var glyph in EffectGlyphs)
-                TextGlyphPool.Release(glyph);
+                TextGlyphPool.Release(glyph.Value);
             EffectGlyphs.Clear();
 
             foreach (var line in lines)
@@ -234,7 +225,7 @@ namespace NUI
                             characters.Add(newGlyph);
                             lineRect.endCharIdx = characters.Count;
 
-                            if (ch == '\n')
+                            if (ch == '\n' && !settings.ignoreNewline)
                             {
                                 lineRect = TextLinePool.Get();
                                 lineRect.ParagraphIndent = settings.ParagraphIndent;
@@ -408,7 +399,10 @@ namespace NUI
             if (!discardAfter)
             {
                 if (!CalcLineHeight(lines.Count - 1, settings))
+                {
                     ReleaseEndLine();
+                    discardAfter = true;
+                }
             }
 
             // for InputField
@@ -439,7 +433,7 @@ namespace NUI
                     break;
             }
 
-            if (settings.OverflowEllipsis && lineCount > lines.Count && charPeriodInfo.index != 0 && lines.Count > 0)
+            if (settings.OverflowEllipsis && discardAfter && charPeriodInfo.index != 0 && lines.Count > 0)
             {
                 lineRect = lines[lines.Count - 1];
 
@@ -605,6 +599,7 @@ namespace NUI
                             glyphUnderline.VertexQuad[1].uv1 = charUnderlineInfo.uvTopRight;
                             glyphUnderline.VertexQuad[2].uv1 = charUnderlineInfo.uvBottomRight;
                             glyphUnderline.VertexQuad[3].uv1 = charUnderlineInfo.uvBottomLeft;
+                            EffectGlyphs[glyphIndex] = glyphUnderline;
                         }
 
                         if (null != glyphUnderline)
@@ -615,7 +610,6 @@ namespace NUI
                     }
                     else if (null != glyphUnderline)
                     {
-                        EffectGlyphs.Add(glyphUnderline);
                         glyphUnderline = null;
                     }
 
@@ -645,6 +639,8 @@ namespace NUI
                             glyphStrikethrough.VertexQuad[1].uv1 = charUnderlineInfo.uvTopRight;
                             glyphStrikethrough.VertexQuad[2].uv1 = charUnderlineInfo.uvBottomRight;
                             glyphStrikethrough.VertexQuad[3].uv1 = charUnderlineInfo.uvBottomLeft;
+
+                            EffectGlyphs[glyphIndex] = glyphStrikethrough;
                         }
 
                         if (null != glyphStrikethrough)
@@ -655,17 +651,11 @@ namespace NUI
                     }
                     else if (null != glyphStrikethrough)
                     {
-                        EffectGlyphs.Add(glyphStrikethrough);
                         glyphStrikethrough = null;
                     }
 
                     lineWidth += glyph.Advance;
                 }
-
-                if (null != glyphUnderline)
-                    EffectGlyphs.Add(glyphUnderline);
-                if (null != glyphStrikethrough)
-                    EffectGlyphs.Add(glyphStrikethrough);
             }
 
             foreach (var link in Links)

@@ -15,28 +15,11 @@ public class TextSample : MonoBehaviour {
 	void Start () {
         text = transform.Find("NText").GetComponent<NText>();
         input = transform.Find("NInputField").GetComponent<NInputField>();
-        transform.Find("ButtonAppendText").GetComponent<Button>().onClick.AddListener(OnBtnAppendText);
-        transform.Find("ButtonAppendLink").GetComponent<Button>().onClick.AddListener(OnBtnAppendLink);
-        transform.Find("ButtonAppendImage").GetComponent<Button>().onClick.AddListener(OnBtnAppendImage);
         transform.Find("ButtonInsertText").GetComponent<Button>().onClick.AddListener(OnBtnInsertText);
         transform.Find("ButtonInsertLink").GetComponent<Button>().onClick.AddListener(OnBtnInsertLink);
         transform.Find("ButtonInsertImage").GetComponent<Button>().onClick.AddListener(OnBtnInsertImage);
+        transform.Find("ButtonSend").GetComponent<Button>().onClick.AddListener(OnBtnSend);
         text.OnLink = OnLink;
-    }
-
-    void OnBtnAppendText()
-    {
-        input.AppendLink("Append Text", fontSize: 32);
-    }
-
-    void OnBtnAppendLink()
-    {
-        input.AppendLink("LinkText", "linkParam", underlineColor: Color.red);
-    }
-
-    void OnBtnAppendImage()
-    {
-        input.AppendImage(0);
     }
 
     void OnBtnInsertText()
@@ -46,12 +29,18 @@ public class TextSample : MonoBehaviour {
 
     void OnBtnInsertLink()
     {
-        input.InsertLink("insert link", input.caretPosition, "param2");
+        input.InsertLink("insert link", input.caretPosition, "param2", underlineColor:Color.red);
     }
 
     void OnBtnInsertImage()
     {
         input.InsertImage(0, input.caretPosition, animLength: 5);
+    }
+
+    void OnBtnSend()
+    {
+        var htmlText = input.HtmlText;
+        text.text += htmlText;
     }
 
     void OnLink(string param)

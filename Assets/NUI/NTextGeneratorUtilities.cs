@@ -1,4 +1,6 @@
 // Unity C# reference source
+using System;
+using System.Text;
 using UnityEngine;
 
 namespace NUI
@@ -298,6 +300,26 @@ namespace NUI
                     return 15;
             }
             return 15;
+        }
+
+        public static bool Compare(this Color left, Color right)
+        {
+            return Mathf.Approximately(left.r, right.r) && Mathf.Approximately(left.g, right.g) && Mathf.Approximately(left.b, right.b) && Mathf.Approximately(left.a, right.a);
+        }
+
+        public static bool Compare(this Color32 left, Color32 right)
+        {
+            return left.r == right.r && left.g == right.g && left.b == right.b && left.a == right.a;
+        }
+
+        public static bool Compare(this Vector2 left, Vector2 right)
+        {
+            return Mathf.Approximately(left.x, right.x) && Mathf.Approximately(left.y, right.y);
+        }
+
+        public static void ToHex(this Color32 color, StringBuilder builder)
+        {
+            builder.AppendFormat("{0:x2}{1:x2}{2:x2}{3:x2}", color.r, color.g, color.b, color.a);
         }
 
         /// <summary>

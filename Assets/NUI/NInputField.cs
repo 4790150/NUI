@@ -50,8 +50,8 @@ namespace NUI
         IPointerClickHandler,
         ISubmitHandler,
         ICanvasElement,
-        ILayoutElement, 
-        ISelectHandler, 
+        ILayoutElement,
+        ISelectHandler,
         IDeselectHandler
     {
         public enum ContentType
@@ -101,7 +101,7 @@ namespace NUI
         public class OnChangeEvent : UnityEvent<string> { }
 
         protected TouchScreenKeyboard m_Keyboard;
-        static private readonly char[] kSeparators = { ' ', '.', ',', '\t', '\r', '\n' };
+        static protected readonly char[] kSeparators = { ' ', '.', ',', '\t', '\r', '\n' };
 
         #region Exposed properties
         /// <summary>
@@ -116,31 +116,31 @@ namespace NUI
         protected Graphic m_Placeholder;
 
         [SerializeField]
-        private ContentType m_ContentType = ContentType.Standard;
+        protected ContentType m_ContentType = ContentType.Standard;
 
         /// <summary>
         /// Type of data expected by the input field.
         /// </summary>
         [FormerlySerializedAs("inputType")]
         [SerializeField]
-        private InputType m_InputType = InputType.Standard;
+        protected InputType m_InputType = InputType.Standard;
 
         /// <summary>
         /// The character used to hide text in password field.
         /// </summary>
         [FormerlySerializedAs("asteriskChar")]
         [SerializeField]
-        private char m_AsteriskChar = '*';
+        protected char m_AsteriskChar = '*';
 
         /// <summary>
         /// Keyboard type applies to mobile keyboards that get shown.
         /// </summary>
         [FormerlySerializedAs("keyboardType")]
         [SerializeField]
-        private TouchScreenKeyboardType m_KeyboardType = TouchScreenKeyboardType.Default;
+        protected TouchScreenKeyboardType m_KeyboardType = TouchScreenKeyboardType.Default;
 
         [SerializeField]
-        private LineType m_LineType = LineType.SingleLine;
+        protected LineType m_LineType = LineType.SingleLine;
 
         /// <summary>
         /// Should hide mobile input.
@@ -148,21 +148,21 @@ namespace NUI
 
         [FormerlySerializedAs("hideMobileInput")]
         [SerializeField]
-        private bool m_HideMobileInput = false;
+        protected bool m_HideMobileInput = false;
 
         /// <summary>
         /// What kind of validation to use with the input field's data.
         /// </summary>
         [FormerlySerializedAs("validation")]
         [SerializeField]
-        private CharacterValidation m_CharacterValidation = CharacterValidation.None;
+        protected CharacterValidation m_CharacterValidation = CharacterValidation.None;
 
         /// <summary>
         /// Maximum number of characters allowed before input no longer works.
         /// </summary>
         [FormerlySerializedAs("characterLimit")]
         [SerializeField]
-        private int m_CharacterLimit = 0;
+        protected int m_CharacterLimit = 0;
 
         /// <summary>
         /// Event delegates triggered when the input field submits its data.
@@ -171,7 +171,7 @@ namespace NUI
         [FormerlySerializedAs("m_OnSubmit")]
         [FormerlySerializedAs("m_EndEdit")]
         [SerializeField]
-        private SubmitEvent m_OnEndEdit = new SubmitEvent();
+        protected SubmitEvent m_OnEndEdit = new SubmitEvent();
 
         /// <summary>
         /// Event delegates triggered when the input field changes its data.
@@ -179,25 +179,25 @@ namespace NUI
         [FormerlySerializedAs("onValueChange")]
         [FormerlySerializedAs("m_OnValueChange")]
         [SerializeField]
-        private OnChangeEvent m_OnValueChanged = new OnChangeEvent();
+        protected OnChangeEvent m_OnValueChanged = new OnChangeEvent();
 
         /// <summary>
         /// Custom validation callback.
         /// </summary>
         [FormerlySerializedAs("onValidateInput")]
         [SerializeField]
-        private OnValidateInput m_OnValidateInput;
+        protected OnValidateInput m_OnValidateInput;
 
         [FormerlySerializedAs("selectionColor")]
         [SerializeField]
-        private Color m_CaretColor = new Color(50f / 255f, 50f / 255f, 50f / 255f, 1f);
+        protected Color m_CaretColor = new Color(50f / 255f, 50f / 255f, 50f / 255f, 1f);
 
         [SerializeField]
-        private bool m_CustomCaretColor = false;
+        protected bool m_CustomCaretColor = false;
 
         [FormerlySerializedAs("selectionColor")]
         [SerializeField]
-        private Color m_SelectionColor = new Color(168f / 255f, 206f / 255f, 255f / 255f, 192f / 255f);
+        protected Color m_SelectionColor = new Color(168f / 255f, 206f / 255f, 255f / 255f, 192f / 255f);
 
         /// <summary>
         /// Input field's value.
@@ -209,47 +209,46 @@ namespace NUI
 
         [SerializeField]
         [Range(0f, 4f)]
-        private float m_CaretBlinkRate = 0.85f;
+        protected float m_CaretBlinkRate = 0.85f;
 
         [SerializeField]
         [Range(1, 5)]
-        private int m_CaretWidth = 1;
+        protected int m_CaretWidth = 1;
 
         [SerializeField]
-        private bool m_ReadOnly = false;
+        protected bool m_ReadOnly = false;
 
         #endregion
 
         protected int m_CaretPosition = 0;
         protected int m_CaretSelectPosition = 0;
-        private RectTransform caretRectTrans = null;
+        protected RectTransform caretRectTrans = null;
         protected UIVertex[] m_CursorVerts = null;
-        private NTextGenerator m_InputTextCache;
-        private CanvasRenderer m_CachedInputRenderer;
-        private bool m_PreventFontCallback = false;
+        protected CanvasRenderer m_CachedInputRenderer;
+        protected bool m_PreventFontCallback = false;
         [NonSerialized] protected Mesh m_Mesh;
-        private bool m_AllowInput = false;
-        private bool m_ShouldActivateNextUpdate = false;
-        private bool m_UpdateDrag = false;
-        private bool m_DragPositionOutOfBounds = false;
-        private const float kHScrollSpeed = 0.05f;
-        private const float kVScrollSpeed = 0.10f;
+        protected bool m_AllowInput = false;
+        protected bool m_ShouldActivateNextUpdate = false;
+        protected bool m_UpdateDrag = false;
+        protected bool m_DragPositionOutOfBounds = false;
+        protected const float kHScrollSpeed = 0.05f;
+        protected const float kVScrollSpeed = 0.10f;
         protected bool m_CaretVisible;
-        private Coroutine m_BlinkCoroutine = null;
-        private float m_BlinkStartTime = 0.0f;
+        protected Coroutine m_BlinkCoroutine = null;
+        protected float m_BlinkStartTime = 0.0f;
         protected int m_DrawStart = 0;
         protected int m_DrawEnd = 0;
-        private Coroutine m_DragCoroutine = null;
-        private string m_OriginalText = "";
-        private bool m_WasCanceled = false;
-        private bool m_HasDoneFocusTransition = false;
-        private WaitForSecondsRealtime m_WaitForSecondsRealtime;
-        private bool m_TouchKeyboardAllowsInPlaceEditing = false;
+        protected Coroutine m_DragCoroutine = null;
+        protected string m_OriginalText = "";
+        protected bool m_WasCanceled = false;
+        protected bool m_HasDoneFocusTransition = false;
+        protected WaitForSecondsRealtime m_WaitForSecondsRealtime;
+        protected bool m_TouchKeyboardAllowsInPlaceEditing = false;
 
         // Doesn't include dot and @ on purpose! See usage for details.
         const string kEmailSpecialCharacters = "!#$%&'*+-/=?^_`{|}~";
 
-        private BaseInput input
+        protected BaseInput input
         {
             get
             {
@@ -259,13 +258,12 @@ namespace NUI
             }
         }
 
-        private string compositionString
+        protected string compositionString
         {
             get { return input != null ? input.compositionString : Input.compositionString; }
         }
 
         protected NInputField()
-            : base()
         {
         }
 
@@ -335,7 +333,7 @@ namespace NUI
 
         static StringBuilder builder = new StringBuilder();
 
-        public int RealTextLength;
+        protected int TextVisibleLength;
 
         /// <summary>
         /// Input field's current text value.
@@ -365,8 +363,8 @@ namespace NUI
             if (value == null)
                 value = "";
             value = value.Replace("\0", string.Empty); // remove embedded nulls
-            if (m_LineType == LineType.SingleLine)
-                value = value.Replace("\n", "").Replace("\t", "");
+            //if (m_LineType == LineType.SingleLine)
+            //    value = value.Replace("\n", "").Replace("\t", "");
 
             RemoveAllCustom();
 
@@ -374,7 +372,7 @@ namespace NUI
             if (onValidateInput != null || characterValidation != CharacterValidation.None)
             {
                 m_Text = "";
-                RealTextLength = 0;
+                TextVisibleLength = 0;
 
                 OnValidateInput validatorMethod = onValidateInput ?? Validate;
                 m_CaretPosition = m_CaretSelectPosition = value.Length;
@@ -385,14 +383,14 @@ namespace NUI
                     if (c != 0)
                     {
                         m_Text += c;
-                        RealTextLength++;
+                        TextVisibleLength++;
                     }
                 }
             }
             else
             {
                 m_Text = characterLimit > 0 && value.Length > characterLimit ? value.Substring(0, characterLimit) : value;
-                RealTextLength = m_Text.Length;
+                TextVisibleLength = m_Text.Length;
             }
 
 #if UNITY_EDITOR
@@ -406,18 +404,110 @@ namespace NUI
             if (m_Keyboard != null)
                 m_Keyboard.text = m_Text;
 
-            if (m_CaretPosition > RealTextLength)
-                m_CaretPosition = m_CaretSelectPosition = RealTextLength;
-            else if (m_CaretSelectPosition > RealTextLength)
-                m_CaretSelectPosition = RealTextLength;
+            if (m_CaretPosition > TextVisibleLength)
+                m_CaretPosition = m_CaretSelectPosition = TextVisibleLength;
+            else if (m_CaretSelectPosition > TextVisibleLength)
+                m_CaretSelectPosition = TextVisibleLength;
 
             if (sendCallback)
                 SendOnValueChanged();
             UpdateLabel();
         }
 
-        private int CustomRichTag = '\xe000';
-        private List<NTextElement> TextElements = new List<NTextElement>();
+        protected int CustomRichTag = '\xe000';
+        protected List<NTextElement> TextElements = new List<NTextElement>();
+
+        public string HtmlText
+        {
+            get
+            {
+                builder.Length = 0;
+                foreach (var c in m_Text)
+                {
+                    NTextElement e = null;
+                    if (CustomElements.TryGetValue((int)c, out e))
+                    {
+                        ConvertToHtmlText(e, builder);
+                    }
+                    else
+                    {
+                        builder.Append(c);
+                    }
+                }
+
+                return builder.ToString();
+            }
+        }
+
+        public void ConvertToHtmlText(NTextElement e, StringBuilder builder)
+        {
+            if (String.IsNullOrEmpty(e.Text))
+            {
+                if (e.AnimLength <= 1 || e.AnimFrame < 1)
+                {
+                    builder.AppendFormat("<sprite index={0} scale={1} align={2}>", e.SpriteIndex, e.SpriteScale, e.SpriteAlign);
+                }
+                else
+                {
+                    builder.AppendFormat("<sprite index={0} scale={1} align={2} animLength={3} animFrame={4}>", e.SpriteIndex, e.SpriteScale, e.SpriteAlign, e.AnimLength, e.AnimFrame);
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(e.LinkParam))
+                    builder.AppendFormat("<link=\"{0}\">", e.LinkParam);
+                builder.AppendFormat("<size={0}>", e.FontSize);
+                if (FontStyle.Bold == e.FontStyle)
+                    builder.Append("<b>");
+                else if (FontStyle.Italic == e.FontStyle)
+                    builder.Append("<i>");
+                if (e.TopColor.Compare(e.BottomColor))
+                {
+                    builder.Append("<color=#");
+                    e.TopColor.ToHex(builder);
+                    builder.Append(">");
+                }
+                else
+                {
+                    builder.Append("<gradient top=#");
+                    e.TopColor.ToHex(builder);
+                    builder.Append(" bottom=#");
+                    e.BottomColor.ToHex(builder);
+                    builder.Append(">");
+                }
+                if (null != e.UnderlineColor)
+                {
+                    builder.Append("<u color=#");
+                    e.UnderlineColor.Value.ToHex(builder);
+                    builder.Append(">");
+                }
+                if (null != e.StrikethroughColor)
+                {
+                    builder.Append("<s color=#>");
+                    e.StrikethroughColor.Value.ToHex(builder);
+                    builder.Append(">");
+                }
+
+                builder.Append(e.Text);
+
+                if (null != e.StrikethroughColor)
+                    builder.Append("</s>");
+                if (null != e.UnderlineColor)
+                    builder.Append("</u>");
+                if (e.TopColor.Compare(e.BottomColor))
+                    builder.Append("</color>");
+                else
+                    builder.Append("</gradient>");
+                if (FontStyle.Bold == e.FontStyle)
+                    builder.Append("</b>");
+                else if (FontStyle.Italic == e.FontStyle)
+                    builder.Append("</i>");
+                builder.Append(@"</size>");
+                if (!string.IsNullOrEmpty(e.LinkParam))
+                    builder.Append(@"</link>");
+            }
+        }
+
 
         public bool isFocused
         {
@@ -535,7 +625,7 @@ namespace NUI
         protected void ClampPos(ref int pos)
         {
             if (pos < 0) pos = 0;
-            else if (pos > RealTextLength) pos = RealTextLength;
+            else if (pos > TextVisibleLength) pos = TextVisibleLength;
         }
 
         /// <summary>
@@ -553,7 +643,7 @@ namespace NUI
             }
         }
         protected int caretSelectPositionInternal { get { return m_CaretSelectPosition + compositionString.Length; } set { m_CaretSelectPosition = value; ClampPos(ref m_CaretSelectPosition); } }
-        private bool hasSelection { get { return caretPositionInternal != caretSelectPositionInternal; } }
+        protected bool hasSelection { get { return caretPositionInternal != caretSelectPositionInternal; } }
 
 #if UNITY_EDITOR
         [Obsolete("caretSelectPosition has been deprecated. Use selectionFocusPosition instead (UnityUpgradable) -> selectionFocusPosition", true)]
@@ -636,11 +726,11 @@ namespace NUI
             if (m_Text == null)
             {
                 m_Text = string.Empty;
-                RealTextLength = 0;
+                TextVisibleLength = 0;
                 RemoveAllCustom();
             }
             m_DrawStart = 0;
-            m_DrawEnd = RealTextLength;
+            m_DrawEnd = TextVisibleLength;
 
             if (m_CachedInputRenderer != null)
                 m_CachedInputRenderer.SetMaterial(textComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
@@ -732,7 +822,7 @@ namespace NUI
             }
         }
 
-        private void UpdateCaretMaterial()
+        protected void UpdateCaretMaterial()
         {
             if (textComponent != null && m_CachedInputRenderer != null)
                 m_CachedInputRenderer.SetMaterial(textComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
@@ -745,13 +835,13 @@ namespace NUI
 
         protected void SelectAll()
         {
-            caretPositionInternal = RealTextLength;
+            caretPositionInternal = TextVisibleLength;
             caretSelectPositionInternal = 0;
         }
 
         public void MoveTextEnd(bool shift)
         {
-            int position = RealTextLength;
+            int position = TextVisibleLength;
 
             if (shift)
             {
@@ -794,7 +884,7 @@ namespace NUI
             }
         }
 
-        private bool InPlaceEditing()
+        protected bool InPlaceEditing()
         {
             return !TouchScreenKeyboard.isSupported || m_TouchKeyboardAllowsInPlaceEditing;
         }
@@ -887,7 +977,7 @@ namespace NUI
                 else
                 {
                     m_Text = "";
-                    RealTextLength = 0;
+                    TextVisibleLength = 0;
                     RemoveAllCustom();
 
                     for (int i = 0; i < val.Length; ++i)
@@ -913,14 +1003,14 @@ namespace NUI
                         if (c != 0)
                         {
                             m_Text += c;
-                            RealTextLength++;
+                            TextVisibleLength++;
                         }
                     }
 
                     if (characterLimit > 0 && m_Text.Length > characterLimit)
                     {
                         m_Text = m_Text.Substring(0, characterLimit);
-                        RealTextLength = m_Text.Length;
+                        TextVisibleLength = m_Text.Length;
                     }
 
                     if (m_Keyboard.canGetSelection)
@@ -929,7 +1019,7 @@ namespace NUI
                     }
                     else
                     {
-                        caretPositionInternal = caretSelectPositionInternal = RealTextLength;
+                        caretPositionInternal = caretSelectPositionInternal = TextVisibleLength;
                     }
 
                     // Set keyboard text before updating label, as we might have changed it with validation
@@ -981,7 +1071,7 @@ namespace NUI
             return new Vector2(pos.x, pos.y);
         }
 
-        private int GetUnclampedCharacterLineFromPosition(Vector2 pos, NTextGenerator generator)
+        protected int GetUnclampedCharacterLineFromPosition(Vector2 pos, NTextGenerator generator)
         {
             if (!multiLine)
                 return 0;
@@ -1055,7 +1145,7 @@ namespace NUI
             return charIndex;
         }
 
-        private bool MayDrag(PointerEventData eventData)
+        protected bool MayDrag(PointerEventData eventData)
         {
             return IsActive() &&
                    IsInteractable() &&
@@ -1079,7 +1169,7 @@ namespace NUI
 
             Vector2 localMousePos;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(textComponent.rectTransform, eventData.position, eventData.pressEventCamera, out localMousePos);
-            caretSelectPositionInternal = GetCharacterIndexFromPosition(localMousePos) + m_DrawStart;
+            caretSelectPositionInternal = GetCharacterIndexFromPosition(localMousePos);// + m_DrawStart;
             MarkGeometryAsDirty();
 
             m_DragPositionOutOfBounds = !RectTransformUtility.RectangleContainsScreenPoint(textComponent.rectTransform, eventData.position, eventData.pressEventCamera);
@@ -1152,7 +1242,7 @@ namespace NUI
             {
                 Vector2 localMousePos;
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(textComponent.rectTransform, eventData.position, eventData.pressEventCamera, out localMousePos);
-                caretSelectPositionInternal = caretPositionInternal = GetCharacterIndexFromPosition(localMousePos) + m_DrawStart;
+                caretSelectPositionInternal = caretPositionInternal = GetCharacterIndexFromPosition(localMousePos);// + m_DrawStart;
             }
             UpdateLabel();
             eventData.Use();
@@ -1322,7 +1412,7 @@ namespace NUI
             return EditState.Continue;
         }
 
-        private bool IsValidChar(char c)
+        protected bool IsValidChar(char c)
         {
             // Delete key on mac
             if ((int)c == 127)
@@ -1337,7 +1427,7 @@ namespace NUI
         /// <summary>
         /// Handle the specified event.
         /// </summary>
-        private Event m_ProcessingEvent = new Event();
+        protected Event m_ProcessingEvent = new Event();
 
         public void ProcessEvent(Event e)
         {
@@ -1384,13 +1474,13 @@ namespace NUI
             eventData.Use();
         }
 
-        private string GetSelectedString()
+        protected string GetSelectedString()
         {
             if (!hasSelection)
                 return "";
 
-            int startPos = CharetPositionToTextIndex(caretPositionInternal);
-            int endPos = CharetPositionToTextIndex(caretSelectPositionInternal);
+            int startPos = CaretPositionToTextIndex(caretPositionInternal);
+            int endPos = CaretPositionToTextIndex(caretSelectPositionInternal);
 
             // Ensure pos is always less then selPos to make the code simpler
             if (startPos > endPos)
@@ -1403,10 +1493,10 @@ namespace NUI
             return m_Text.Substring(startPos, endPos - startPos);
         }
 
-        private int FindtNextWordBegin()
+        protected int FindtNextWordBegin()
         {
-            if (caretSelectPositionInternal + 1 >= RealTextLength)
-                return RealTextLength;
+            if (caretSelectPositionInternal + 1 >= TextVisibleLength)
+                return TextVisibleLength;
 
             //int spaceLoc = m_Text.IndexOfAny(kSeparators, caretSelectPositionInternal + 1);
             int spaceLoc = caretSelectPositionInternal;
@@ -1424,7 +1514,7 @@ namespace NUI
             return spaceLoc;
         }
 
-        private void MoveRight(bool shift, bool ctrl)
+        protected void MoveRight(bool shift, bool ctrl)
         {
             if (hasSelection && !shift)
             {
@@ -1443,12 +1533,19 @@ namespace NUI
                 if (position < cachedInputTextGenerator.characterCount)
                 {
                     var currChar = cachedInputTextGenerator.characters[position];
+                    while (m_LineType == LineType.SingleLine && currChar.Char == '\n' && position < cachedInputTextGenerator.characterCountVisible)
+                        currChar = cachedInputTextGenerator.characters[++position];
+
                     while (++position < cachedInputTextGenerator.characterCount)
                     {
                         var nextChar = cachedInputTextGenerator.characters[position];
                         if (0 == currChar.CustomCharTag || currChar.CustomCharTag != nextChar.CustomCharTag)
                             break;
                     }
+
+                    currChar = cachedInputTextGenerator.characters[position];
+                    while (m_LineType == LineType.SingleLine && currChar.Char == '\n' && position < cachedInputTextGenerator.characterCountVisible)
+                        currChar = cachedInputTextGenerator.characters[++position];
                 }
             }
 
@@ -1458,7 +1555,7 @@ namespace NUI
                 caretSelectPositionInternal = caretPositionInternal = position;
         }
 
-        private int FindtPrevWordBegin()
+        protected int FindtPrevWordBegin()
         {
             if (caretSelectPositionInternal - 2 < 0)
                 return 0;
@@ -1480,7 +1577,7 @@ namespace NUI
             return spaceLoc;
         }
 
-        private void MoveLeft(bool shift, bool ctrl)
+        protected void MoveLeft(bool shift, bool ctrl)
         {
             if (hasSelection && !shift)
             {
@@ -1499,6 +1596,9 @@ namespace NUI
                 if (position >= 0)
                 {
                     var currChar = cachedInputTextGenerator.characters[position];
+                    while (m_LineType == LineType.SingleLine && currChar.Char == '\n' && position > 0)
+                        currChar = cachedInputTextGenerator.characters[--position];
+
                     if (0 != currChar.CustomCharTag)
                     {
                         while (position - 1 >= 0)
@@ -1509,6 +1609,10 @@ namespace NUI
                             position--;
                         }
                     }
+
+                    currChar = cachedInputTextGenerator.characters[position];
+                    while (m_LineType == LineType.SingleLine && currChar.Char == '\n' && position > 0)
+                        currChar = cachedInputTextGenerator.characters[--position];
                 }
             }
 
@@ -1518,7 +1622,7 @@ namespace NUI
                 caretSelectPositionInternal = caretPositionInternal = position;
         }
 
-        private int DetermineCharacterLine(int charPos, NTextGenerator generator)
+        protected int DetermineCharacterLine(int charPos, NTextGenerator generator)
         {
             for (int i = 0; i < generator.lineCount - 1; ++i)
             {
@@ -1533,7 +1637,7 @@ namespace NUI
         ///  Use cachedInputTextGenerator as the y component for the TRichTextGlyph is not required
         /// </summary>
 
-        private int LineUpCharacterPosition(int originalPos, bool goToFirstChar)
+        protected int LineUpCharacterPosition(int originalPos, bool goToFirstChar)
         {
             if (originalPos >= cachedInputTextGenerator.characters.Count)
                 return 0;
@@ -1577,17 +1681,17 @@ namespace NUI
         ///  Use cachedInputTextGenerator as the y component for the TRichTextGlyph is not required
         /// </summary>
 
-        private int LineDownCharacterPosition(int originalPos, bool goToLastChar)
+        protected int LineDownCharacterPosition(int originalPos, bool goToLastChar)
         {
             if (originalPos >= cachedInputTextGenerator.characterCountVisible)
-                return RealTextLength;
+                return TextVisibleLength;
 
             NTextGlyph originChar = cachedInputTextGenerator.characters[originalPos];
             int originLine = DetermineCharacterLine(originalPos, cachedInputTextGenerator);
 
             // We are on the last line return last character
             if (originLine + 1 >= cachedInputTextGenerator.lineCount)
-                return goToLastChar ? RealTextLength : originalPos;
+                return goToLastChar ? TextVisibleLength : originalPos;
 
             // Need to determine end line for next line.
             int endCharIdx = GetLineEndPosition(cachedInputTextGenerator, originLine + 1);
@@ -1618,12 +1722,12 @@ namespace NUI
             return position;
         }
 
-        private void MoveDown(bool shift)
+        protected void MoveDown(bool shift)
         {
             MoveDown(shift, true);
         }
 
-        private void MoveDown(bool shift, bool goToLastChar)
+        protected void MoveDown(bool shift, bool goToLastChar)
         {
             if (hasSelection && !shift)
             {
@@ -1632,7 +1736,7 @@ namespace NUI
                 caretPositionInternal = caretSelectPositionInternal = Mathf.Max(caretPositionInternal, caretSelectPositionInternal);
             }
 
-            int position = multiLine ? LineDownCharacterPosition(caretSelectPositionInternal, goToLastChar) : RealTextLength;
+            int position = multiLine ? LineDownCharacterPosition(caretSelectPositionInternal, goToLastChar) : TextVisibleLength;
 
             if (shift)
                 caretSelectPositionInternal = position;
@@ -1640,12 +1744,12 @@ namespace NUI
                 caretPositionInternal = caretSelectPositionInternal = position;
         }
 
-        private void MoveUp(bool shift)
+        protected void MoveUp(bool shift)
         {
             MoveUp(shift, true);
         }
 
-        private void MoveUp(bool shift, bool goToFirstChar)
+        protected void MoveUp(bool shift, bool goToFirstChar)
         {
             if (hasSelection && !shift)
             {
@@ -1662,7 +1766,7 @@ namespace NUI
                 caretSelectPositionInternal = caretPositionInternal = position;
         }
 
-        private void Delete()
+        protected void Delete()
         {
             if (m_ReadOnly)
                 return;
@@ -1670,8 +1774,8 @@ namespace NUI
             if (caretPositionInternal == caretSelectPositionInternal)
                 return;
 
-            var txtCaretPosition = CharetPositionToTextIndex(caretPositionInternal);
-            var txtCaretSelectPosition = CharetPositionToTextIndex(caretSelectPositionInternal);
+            var txtCaretPosition = CaretPositionToTextIndex(caretPositionInternal);
+            var txtCaretSelectPosition = CaretPositionToTextIndex(caretSelectPositionInternal);
             if (caretPositionInternal < caretSelectPositionInternal)
             {
                 //m_Text = m_Text.Substring(0, txtCaretPosition) + m_Text.Substring(txtCaretSelectPosition, m_Text.Length - txtCaretSelectPosition);
@@ -1686,7 +1790,7 @@ namespace NUI
             }
         }
 
-        private void ForwardSpace()
+        protected void ForwardSpace()
         {
             if (m_ReadOnly)
                 return;
@@ -1699,18 +1803,38 @@ namespace NUI
             }
             else
             {
-                var realCaret = CharetPositionToTextIndex(caretPositionInternal);
+                var realCaret = CaretPositionToTextIndex(caretPositionInternal);
                 if (realCaret < m_Text.Length)
                 {
                     //m_Text = m_Text.Remove(realCaret, 1);
                     DeleteChar(realCaret, realCaret + 1);
+
+                    //if (m_LineType == LineType.SingleLine)  // 单行模式跳过换行符
+                    //{
+                    //    var c = m_Text[realCaret - 1];
+                    //    var length = 1;
+                    //    NTextElement e = null;
+                    //    if (CustomElements.TryGetValue((int)c, out e))
+                    //    {
+                    //        length = Mathf.Max(1, null == e.Text ? 1 : e.Text.Length);
+                    //    }
+
+                    //    int position = caretPositionInternal + length;
+                    //    if (position < cachedInputTextGenerator.characterCountVisible)
+                    //    {
+                    //        var currGlyph = cachedInputTextGenerator.characters[position];
+                    //        while (m_LineType == LineType.SingleLine && currGlyph.Char == '\n' && position < cachedInputTextGenerator.characterCountVisible)
+                    //            currGlyph = cachedInputTextGenerator.characters[++position];
+                    //    }
+                    //}
+
                     UpdateTouchKeyboardFromEditChanges();
                     SendOnValueChangedAndUpdateLabel();
                 }
             }
         }
 
-        private void Backspace()
+        protected void Backspace()
         {
             if (hasSelection)
             {
@@ -1722,18 +1846,30 @@ namespace NUI
             {
                 if (caretPositionInternal > 0)
                 {
-                    var realCaret = CharetPositionToTextIndex(caretPositionInternal);
+                    var realCaret = CaretPositionToTextIndex(caretPositionInternal);
                     var c = m_Text[realCaret - 1];
                     var length = 1;
                     NTextElement e = null;
                     if (CustomElements.TryGetValue((int)c, out e))
                     {
-                        length = Mathf.Max(1, null == e.Text ? 0 : e.Text.Length);
+                        length = Mathf.Max(1, null == e.Text ? 1 : e.Text.Length);
                     }
 
                     //m_Text = m_Text.Remove(realCaret - 1, 1);
                     DeleteChar(realCaret - 1, realCaret);
                     caretSelectPositionInternal = caretPositionInternal = caretPositionInternal - length;
+
+                    //if (m_LineType == LineType.SingleLine)  // 单行模式跳过换行符
+                    //{
+                    //    int position = caretPositionInternal;
+                    //    if (position > 0)
+                    //    {
+                    //        var currGlyph = cachedInputTextGenerator.characters[position];
+                    //        while (currGlyph.Char == '\n' && position > 0)
+                    //            currGlyph = cachedInputTextGenerator.characters[++position];
+                    //    }
+                    //    caretSelectPositionInternal = caretPositionInternal = position;
+                    //}
 
                     UpdateTouchKeyboardFromEditChanges();
                     SendOnValueChangedAndUpdateLabel();
@@ -1742,7 +1878,7 @@ namespace NUI
         }
 
         // Insert the character and update the label.
-        private void Insert(char c)
+        protected void Insert(char c)
         {
             if (m_ReadOnly)
                 return;
@@ -1755,7 +1891,7 @@ namespace NUI
                 return;
 
             //m_Text = m_Text.Insert( CharetPositionToTextIndex(m_CaretPosition), replaceString);
-            InsertStr(replaceString, CharetPositionToTextIndex(m_CaretPosition));
+            InsertStr(replaceString, CaretPositionToTextIndex(m_CaretPosition));
             caretSelectPositionInternal = caretPositionInternal += replaceString.Length;
 
             UpdateTouchKeyboardFromEditChanges();
@@ -1775,7 +1911,7 @@ namespace NUI
                 return;
 
             //m_Text = m_Text.Insert(CharetPositionToTextIndex(m_CaretPosition), replaceString);
-            InsertStr(replaceString, CharetPositionToTextIndex(m_CaretPosition));
+            InsertStr(replaceString, CaretPositionToTextIndex(m_CaretPosition));
             caretSelectPositionInternal = caretPositionInternal += replaceString.Length;
 
             UpdateTouchKeyboardFromEditChanges();
@@ -1792,13 +1928,13 @@ namespace NUI
 
             //m_Text = m_Text + c.ToString();
             InsertStr(c.ToString(), m_Text.Length);
-            caretSelectPositionInternal = caretPositionInternal = RealTextLength;
+            caretSelectPositionInternal = caretPositionInternal = TextVisibleLength;
 
             UpdateTouchKeyboardFromEditChanges();
             SendOnValueChangedAndUpdateLabel();
         }
 
-        private void UpdateTouchKeyboardFromEditChanges()
+        protected void UpdateTouchKeyboardFromEditChanges()
         {
             // Update the TouchKeyboard's text from edit changes
             // if in-place editing is allowed
@@ -1808,13 +1944,13 @@ namespace NUI
             }
         }
 
-        private void SendOnValueChangedAndUpdateLabel()
+        protected void SendOnValueChangedAndUpdateLabel()
         {
             SendOnValueChanged();
             UpdateLabel();
         }
 
-        private void SendOnValueChanged()
+        protected void SendOnValueChanged()
         {
             if (onValueChanged != null)
                 onValueChanged.Invoke(m_Text);
@@ -1853,7 +1989,7 @@ namespace NUI
             }
         }
 
-        private const int k_MaxTextLength = UInt16.MaxValue / 4 - 1;
+        protected const int k_MaxTextLength = UInt16.MaxValue / 4 - 1;
 
         protected virtual void Append(char input)
         {
@@ -1906,7 +2042,7 @@ namespace NUI
 
                 string fullText;
                 if (compositionString.Length > 0)
-                    fullText = m_Text.Substring(0, CharetPositionToTextIndex(m_CaretPosition)) + compositionString + m_Text.Substring(CharetPositionToTextIndex(m_CaretPosition));
+                    fullText = m_Text.Substring(0, CaretPositionToTextIndex(m_CaretPosition)) + compositionString + m_Text.Substring(CaretPositionToTextIndex(m_CaretPosition));
                 else
                     fullText = m_Text;
 
@@ -1928,7 +2064,7 @@ namespace NUI
                 if (!m_AllowInput)
                 {
                     m_DrawStart = 0;
-                    m_DrawEnd = RealTextLength;
+                    m_DrawEnd = TextVisibleLength;
                 }
 
                 //if (!isEmpty)
@@ -1938,12 +2074,13 @@ namespace NUI
 
                     var settings = textComponent.GetGenerationSettings(textComponent.GetGenerationSettings(extents));
                     settings.generateOutOfBounds = true;
+                    settings.ignoreNewline = m_LineType == LineType.SingleLine;
 
                     cachedInputTextGenerator.PopulateAlways(NTextParser.Parse(processed, settings, TextElements, CustomElements), settings);
 
                     SetDrawRangeToContainCaretPosition(caretSelectPositionInternal);
 
-                    processed = processed.Substring( CharetPositionToTextIndex(m_DrawStart, true), Mathf.Min(CharetPositionToTextIndex(m_DrawEnd), processed.Length) - CharetPositionToTextIndex(m_DrawStart, true));
+                    processed = processed.Substring( CaretPositionToTextIndex(m_DrawStart, true), Mathf.Min(CaretPositionToTextIndex(m_DrawEnd), processed.Length) - CaretPositionToTextIndex(m_DrawStart, true));
 
                     //
                     ImageTexture.Clear();
@@ -1964,7 +2101,7 @@ namespace NUI
             }
         }
 
-        private bool IsSelectionVisible()
+        protected bool IsSelectionVisible()
         {
             if (m_DrawStart > caretPositionInternal || m_DrawStart > caretSelectPositionInternal)
                 return false;
@@ -1975,13 +2112,13 @@ namespace NUI
             return true;
         }
 
-        private static int GetLineStartPosition(NTextGenerator gen, int line)
+        protected static int GetLineStartPosition(NTextGenerator gen, int line)
         {
             line = Mathf.Clamp(line, 0, gen.lines.Count - 1);
             return gen.lines[line].startCharIdx;
         }
 
-        private static int GetLineEndPosition(NTextGenerator gen, int line)
+        protected static int GetLineEndPosition(NTextGenerator gen, int line)
         {
             line = Mathf.Max(line, 0);
             if (line + 1 < gen.lines.Count)
@@ -1989,7 +2126,7 @@ namespace NUI
             return gen.characterCountVisible;
         }
 
-        private void SetDrawRangeToContainCaretPosition(int caretPos)
+        protected void SetDrawRangeToContainCaretPosition(int caretPos)
         {
             if (cachedInputTextGenerator.lineCount <= 0)
                 return;
@@ -2111,6 +2248,7 @@ namespace NUI
             {
                 if (glyph.Key < m_DrawStart || glyph.Key >= m_DrawEnd)
                 {
+                    TextGlyphPool.Release(glyph.Value);
                     removed.Add(glyph.Key);
                 }
             }
@@ -2144,6 +2282,11 @@ namespace NUI
                 var firstChar = cachedInputTextGenerator.characters[m_DrawStart];
                 startPos.x = rect.xMin - (firstChar.VertexQuad[0].position.x + firstChar.MinX);
 
+                foreach (var line in cachedInputTextGenerator.lines)
+                {
+                    line.BaseLine += startPos.y;
+                }
+
                 foreach (var glyph in cachedInputTextGenerator.characters)
                 {
                     var vertexQuad = glyph.VertexQuad;
@@ -2155,7 +2298,7 @@ namespace NUI
 
                 foreach (var glyph in cachedInputTextGenerator.EffectGlyphs)
                 {
-                    var vertexQuad = glyph.VertexQuad;
+                    var vertexQuad = glyph.Value.VertexQuad;
                     vertexQuad[0].position += startPos;
                     vertexQuad[1].position += startPos;
                     vertexQuad[2].position += startPos;
@@ -2169,7 +2312,7 @@ namespace NUI
             UpdateLabel();
         }
 
-        private void MarkGeometryAsDirty()
+        protected void MarkGeometryAsDirty()
         {
 #if UNITY_EDITOR
             if (!Application.isPlaying || UnityEditor.PrefabUtility.GetPrefabObject(gameObject) != null)
@@ -2213,7 +2356,7 @@ namespace NUI
             if (m_CachedInputRenderer == null && textComponent != null)
             {
                 GameObject go = new GameObject(transform.name + " Input Caret", typeof(RectTransform), typeof(CanvasRenderer));
-                //go.hideFlags = HideFlags.DontSave;
+                go.hideFlags = HideFlags.HideAndDontSave;
                 go.transform.SetParent(transform);
                 go.transform.SetAsFirstSibling();
                 go.layer = gameObject.layer;
@@ -2235,7 +2378,7 @@ namespace NUI
             m_CachedInputRenderer.SetMesh(mesh);
         }
 
-        private void AssignPositioningIfNeeded()
+        protected void AssignPositioningIfNeeded()
         {
             if (textComponent != null && caretRectTrans != null &&
                 (caretRectTrans.localPosition != textComponent.rectTransform.localPosition ||
@@ -2262,10 +2405,11 @@ namespace NUI
                 caretRectTrans.anchorMax = Vector2.one;
                 caretRectTrans.sizeDelta = Vector2.zero;
                 caretRectTrans.pivot = Vector2.zero;
+                //caretRectTrans.offsetMax = Vector2.one;
             }
         }
 
-        private void OnFillVBO(Mesh vbo)
+        protected void OnFillVBO(Mesh vbo)
         {
             using (var helper = new VertexHelper())
             {
@@ -2285,7 +2429,7 @@ namespace NUI
             }
         }
 
-        private void GenerateCursor(VertexHelper vbo, Vector2 roundingOffset)
+        protected void GenerateCursor(VertexHelper vbo, Vector2 roundingOffset)
         {
             if (!m_CaretVisible)
                 return;
@@ -2365,7 +2509,7 @@ namespace NUI
             input.compositionCursorPos = startPosition;
         }
 
-        private void CreateCursorVerts()
+        protected void CreateCursorVerts()
         {
             m_CursorVerts = new UIVertex[4];
 
@@ -2376,7 +2520,7 @@ namespace NUI
             }
         }
 
-        private float SumLineHeights(int endLine, NTextGenerator generator)
+        protected float SumLineHeights(int endLine, NTextGenerator generator)
         {
             if (endLine < generator.lineCount)
                 return generator.lines[endLine].BaseLine + generator.lines[endLine].Height;
@@ -2390,7 +2534,7 @@ namespace NUI
             return 0;
         }
 
-        private void GenerateHightlight(VertexHelper vbo, Vector2 roundingOffset)
+        protected void GenerateHightlight(VertexHelper vbo, Vector2 roundingOffset)
         {
             int startChar = Mathf.Max(0, caretPositionInternal);
             int endChar = Mathf.Max(0, caretSelectPositionInternal);
@@ -2584,7 +2728,7 @@ namespace NUI
             m_ShouldActivateNextUpdate = true;
         }
 
-        private void ActivateInputFieldInternal()
+        protected void ActivateInputFieldInternal()
         {
             if (EventSystem.current == null)
                 return;
@@ -2689,7 +2833,7 @@ namespace NUI
                 m_ShouldActivateNextUpdate = true;
         }
 
-        private void EnforceContentType()
+        protected void EnforceContentType()
         {
             switch (contentType)
             {
@@ -2883,7 +3027,7 @@ namespace NUI
 
         public int AppendLink(string text, string linkParam = null, int fontSize = 0, FontStyle? fontStyle = null, Color32? color = null, Color32? bottomColor = null, Color32? underlineColor = null, Color32? strikethroughColor = null)
         {
-            RealTextLength += text.Length;
+            TextVisibleLength += text.Length;
 
             var element = TextElementPool.Get();
             element.Text = text;
@@ -2898,14 +3042,14 @@ namespace NUI
             CustomElements[CustomRichTag] = element;
 
             m_Text += (char)CustomRichTag;
-            caretSelectPositionInternal = caretPositionInternal = RealTextLength;
+            caretSelectPositionInternal = caretPositionInternal = TextVisibleLength;
             UpdateLabel();
             return CustomRichTag++;
         }
 
         public int AppendImage(int spriteIndex, float spriteScale = 1.0f, NVerticalAlign align = NVerticalAlign.Bottom, int animLength = 0, int animFrame = 0)
         {
-            RealTextLength++;
+            TextVisibleLength++;
 
             var element = TextElementPool.Get();
             element.SpriteIndex = spriteIndex;
@@ -2920,14 +3064,14 @@ namespace NUI
             CustomElements[CustomRichTag] = element;
 
             m_Text += (char)CustomRichTag;
-            caretSelectPositionInternal = caretPositionInternal = RealTextLength;
+            caretSelectPositionInternal = caretPositionInternal = TextVisibleLength;
             UpdateLabel();
             return CustomRichTag++;
         }
 
-        public int InsertLink(string text, int txtPos, string linkParam, int fontSize = 0, FontStyle? fontStyle = null, Color32? color = null, Color32? bottomColor = null, Color32? underlineColor = null, Color32? strikethroughColor = null)
+        public int InsertLink(string text, int caretPos, string linkParam, int fontSize = 0, FontStyle? fontStyle = null, Color32? color = null, Color32? bottomColor = null, Color32? underlineColor = null, Color32? strikethroughColor = null)
         {
-            RealTextLength += text.Length;
+            TextVisibleLength += text.Length;
 
             var element = TextElementPool.Get();
             element.Text = text;
@@ -2942,16 +3086,16 @@ namespace NUI
             element.CustomCharTag = CustomRichTag;
             CustomElements[CustomRichTag] = element;
 
-            txtPos = Mathf.Clamp(txtPos, 0, m_Text.Length);
+            var txtPos = CaretPositionToTextIndex(caretPos);
             m_Text = m_Text.Insert(txtPos, ((char)CustomRichTag).ToString());
             caretSelectPositionInternal = caretPositionInternal += text.Length;
             UpdateLabel();
             return CustomRichTag++;
         }
 
-        public int InsertImage(int spriteIndex, int txtPos, float spriteScale = 1.0f, NVerticalAlign align = NVerticalAlign.Bottom, int animLength = 0, int animFrame = 0, Color32? underlineColor = null, Color32? strikethroughColor = null)
+        public int InsertImage(int spriteIndex, int caretPos, float spriteScale = 1.0f, NVerticalAlign align = NVerticalAlign.Bottom, int animLength = 0, int animFrame = 0, Color32? underlineColor = null, Color32? strikethroughColor = null)
         {
-            RealTextLength++;
+            TextVisibleLength++;
 
             var element = TextElementPool.Get();
             element.SpriteIndex = spriteIndex;
@@ -2965,14 +3109,14 @@ namespace NUI
             element.CustomCharTag = CustomRichTag;
             CustomElements[CustomRichTag] = element;
 
-            txtPos = Mathf.Clamp(txtPos, 0, m_Text.Length);
+            var txtPos = CaretPositionToTextIndex(caretPos);
             m_Text = m_Text.Insert(txtPos, ((char)CustomRichTag).ToString());
             caretSelectPositionInternal = caretPositionInternal += 1;
             UpdateLabel();
             return CustomRichTag++;
         }
 
-        private int CharetPositionToTextIndex(int realCaret, bool before = false)
+        protected int CaretPositionToTextIndex(int realCaret, bool before = false)
         {
             int realIndex = 0;
             int txtCharet = 0;
@@ -3009,9 +3153,9 @@ namespace NUI
             return txtCharet;
         }
 
-        private void InsertStr(string str, int txtPosition)
+        protected void InsertStr(string str, int txtPosition)
         {
-            RealTextLength += str.Length;
+            TextVisibleLength += str.Length;
 
             int index = 0;
             int txtCharet = 0;
@@ -3065,7 +3209,7 @@ namespace NUI
 
         static int[] elementPos = new int[32];
 
-        private void DeleteChar(int start, int end)
+        protected void DeleteChar(int start, int end)
         {
             if (elementPos.Length < TextElements.Count * 2)
                 Array.Resize(ref elementPos, TextElements.Count * 2);
@@ -3104,10 +3248,10 @@ namespace NUI
                     int d_end = Mathf.Min(eEnd, end);
                     if (d_end - d_start == length)
                     {
-                        RealTextLength -= null == e.Text ? (e.CustomCharTag == 0 ? 0 : 1) : e.Text.Length;
+                        TextVisibleLength -= null == e.Text ? (e.CustomCharTag == 0 ? 0 : 1) : e.Text.Length;
 
-                        //if (CustomElements.ContainsKey(e.CustomCharTag))
-                        //    CustomElements.Remove(e.CustomCharTag);
+                        if (CustomElements.ContainsKey(e.CustomCharTag))
+                            CustomElements.Remove(e.CustomCharTag);
 
                         TextElementPool.Release(e);
                         TextElements.RemoveAt(i);
@@ -3122,7 +3266,7 @@ namespace NUI
                             builder.Append( text.Substring(d_end - eStart, eEnd - d_end) );
                         e.Text = builder.ToString();
 
-                        RealTextLength -= d_end - d_start;
+                        TextVisibleLength -= d_end - d_start;
                     }
                 }
 
@@ -3138,7 +3282,7 @@ namespace NUI
             m_Text = builder.ToString();
         }
 
-        private void RemoveAllCustom()
+        protected void RemoveAllCustom()
         {
             CustomRichTag = '\xe000';
             foreach (var e in CustomElements)
@@ -3164,7 +3308,7 @@ namespace NUI
             //}
 
             vh.Clear();
-            for (int i = m_DrawStart; i < m_DrawEnd; i++)
+            for (int i = m_DrawStart; i <= m_DrawEnd; i++)
             {
                 if (!cachedInputTextGenerator.characters[i].IsImage())
                 {
@@ -3172,35 +3316,43 @@ namespace NUI
                 }
             }
 
-            var extents = textComponent.rectTransform.rect;
-            foreach (var glyph in cachedInputTextGenerator.EffectGlyphs)
+            if (cachedInputTextGenerator.EffectGlyphs.Count > 0)
             {
-                Array.Copy(glyph.VertexQuad, vertexQuad, 4);
-
-                if ((vertexQuad[0].position.x > extents.xMin && vertexQuad[0].position.x < extents.xMax && vertexQuad[0].position.y > extents.yMin && vertexQuad[0].position.y < extents.yMax) ||
-                    (vertexQuad[2].position.x > extents.xMin && vertexQuad[2].position.x < extents.xMax && vertexQuad[2].position.y > extents.yMin && vertexQuad[2].position.y < extents.yMax) )
+                var extents = textComponent.rectTransform.rect;
+                var startline = DetermineCharacterLine(m_DrawStart, cachedInputTextGenerator);
+                var endline = DetermineCharacterLine(m_DrawEnd, cachedInputTextGenerator);
+                foreach (var glyph in cachedInputTextGenerator.EffectGlyphs)
                 {
-                    Vector3 position = vertexQuad[0].position;
-                    position.x = Mathf.Max(extents.xMin, position.x);
-                    position.x = Mathf.Min(extents.xMax, position.x);
-                    vertexQuad[0].position = position;
+                    var lineIndex = DetermineCharacterLine(glyph.Key, cachedInputTextGenerator);
+                    if (lineIndex < startline || lineIndex > endline)
+                        continue;
 
-                    position = vertexQuad[1].position;
-                    position.x = Mathf.Max(extents.xMin, position.x);
-                    position.x = Mathf.Min(extents.xMax, position.x);
-                    vertexQuad[1].position = position;
+                    Array.Copy(glyph.Value.VertexQuad, vertexQuad, 4);
 
-                    position = vertexQuad[2].position;
-                    position.x = Mathf.Max(extents.xMin, position.x);
-                    position.x = Mathf.Min(extents.xMax, position.x);
-                    vertexQuad[2].position = position;
+                    if ((vertexQuad[0].position.x > extents.xMin && vertexQuad[0].position.x < extents.xMax) || (vertexQuad[2].position.x > extents.xMin && vertexQuad[2].position.x < extents.xMax))
+                    {
+                        Vector3 position = vertexQuad[0].position;
+                        position.x = Mathf.Max(extents.xMin, position.x);
+                        position.x = Mathf.Min(extents.xMax, position.x);
+                        vertexQuad[0].position = position;
 
-                    position = vertexQuad[3].position;
-                    position.x = Mathf.Max(extents.xMin, position.x);
-                    position.x = Mathf.Min(extents.xMax, position.x);
-                    vertexQuad[3].position = position;
+                        position = vertexQuad[1].position;
+                        position.x = Mathf.Max(extents.xMin, position.x);
+                        position.x = Mathf.Min(extents.xMax, position.x);
+                        vertexQuad[1].position = position;
 
-                    vh.AddUIVertexQuad(vertexQuad);
+                        position = vertexQuad[2].position;
+                        position.x = Mathf.Max(extents.xMin, position.x);
+                        position.x = Mathf.Min(extents.xMax, position.x);
+                        vertexQuad[2].position = position;
+
+                        position = vertexQuad[3].position;
+                        position.x = Mathf.Max(extents.xMin, position.x);
+                        position.x = Mathf.Min(extents.xMax, position.x);
+                        vertexQuad[3].position = position;
+
+                        vh.AddUIVertexQuad(vertexQuad);
+                    }
                 }
             }
         }
