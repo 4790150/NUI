@@ -404,7 +404,9 @@ namespace NUI
         public new NTextGenerator cachedTextGenerator = new NTextGenerator();
         public Dictionary<int, NTextElement> CustomElements = new Dictionary<int, NTextElement>();
         protected List<NTextElement> textElements = new List<NTextElement>();
-        protected static List<NTextElement> s_textElements = new List<NTextElement>();
+
+        protected static new NTextGenerator cachedTextGeneratorForLayout = new NTextGenerator();
+        protected static List<NTextElement> textElementsForLayout = new List<NTextElement>();
 
         protected static int imageCount = 0;
         protected static NGameObjectPool _imagePool;
@@ -639,14 +641,27 @@ namespace NUI
         {
             var settings = GetGenerationSettings(GetGenerationSettings(rectTransform.rect.size));
 
-            return _dataDirty = Populate(text, settings, textElements) | _dataDirty;
+            bool rebuild = Populate(text, cachedTextGenerator, settings, textElements);
+            if (rebuild)
+            {
+                _lastText = text;
+                _lastSettings = settings;
+                m_HasGenerated = true;
+            }
+            return rebuild;
         }
 
-        protected bool Populate(string text, NTextGenerationSettings settings, List<NTextElement> elements)
+        protected bool Populate(string text, NTextGenerator textGenerator, NTextGenerationSettings settings, List<NTextElement> elements)
         {
             if (m_HasGenerated && settings.Equals(_lastSettings) && text == _lastText)
                 return false;
 
+            PopulateAlways(text, textGenerator, settings, elements);
+            return true;
+        }
+
+        protected void PopulateAlways(string text, NTextGenerator textGenerator, NTextGenerationSettings settings, List<NTextElement> elements)
+        {
             ImageTexture.Clear();
             var sprites = null == _spritePackage ? _sprites : _spritePackage.Sprites;
             for (int i = 0; i < sprites.LengthSafe(); i++)
@@ -658,13 +673,8 @@ namespace NUI
             NTextParser.Parse(text, settings, elements, CustomElements);
 
             m_DisableFontTextureRebuiltCallback = true;
-            cachedTextGenerator.PopulateAlways(elements, settings);
+            textGenerator.PopulateAlways(elements, settings);
             m_DisableFontTextureRebuiltCallback = false;
-
-            _lastText = text;
-            _lastSettings = settings;
-            m_HasGenerated = true;
-            return true;
         }
 
         protected void ProcessMaterial()
@@ -816,6 +826,7 @@ namespace NUI
                 if (_dataDirty)
                 {
                     CreateRichImage();
+                    _dataDirty = false;
                 }
 
                 if (0 == AnimGlyphs.Count)
@@ -835,8 +846,10 @@ namespace NUI
                 settings.horizontalOverflow = HorizontalWrapMode.Overflow;
                 settings.verticalOverflow = VerticalWrapMode.Overflow;
 
-                Populate(text, settings, s_textElements);
-                return cachedTextGenerator.RealTextWidth;
+                if (Populate(text, cachedTextGeneratorForLayout, settings, textElementsForLayout))
+                    return cachedTextGeneratorForLayout.RealTextWidth;
+                else
+                    return cachedTextGenerator.RealTextWidth;
             }
         }
 
@@ -849,8 +862,10 @@ namespace NUI
                 //settings.horizontalOverflow = HorizontalWrapMode.Overflow;
                 settings.verticalOverflow = VerticalWrapMode.Overflow;
 
-                Populate(text, settings, s_textElements);
-                return cachedTextGenerator.RealTextHeight;
+                if (Populate(text, cachedTextGeneratorForLayout, settings, textElementsForLayout))
+                    return cachedTextGeneratorForLayout.RealTextHeight;
+                else
+                    return cachedTextGenerator.RealTextHeight;
             }
         }
 

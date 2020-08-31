@@ -415,7 +415,6 @@ namespace NUI
         }
 
         protected int CustomRichTag = '\xe000';
-        protected List<NTextElement> TextElements = new List<NTextElement>();
 
         public string HtmlText
         {
@@ -2071,30 +2070,25 @@ namespace NUI
                 {
                     // Determine what will actually fit into the given line
                     Vector2 extents = textComponent.rectTransform.rect.size;
-
                     var settings = textComponent.GetGenerationSettings(textComponent.GetGenerationSettings(extents));
                     settings.generateOutOfBounds = true;
                     settings.ignoreNewline = m_LineType == LineType.SingleLine;
 
-                    cachedInputTextGenerator.PopulateAlways(NTextParser.Parse(processed, settings, TextElements, CustomElements), settings);
+                    //cachedInputTextGenerator.PopulateAlways(NTextParser.Parse(processed, settings, textElements, CustomElements), settings);
+                    bool rebuild = Populate(processed, cachedTextGenerator, settings, textElements);
+                    if (rebuild)
+                    {
+                        _lastText = text;
+                        _lastSettings = settings;
+                        m_HasGenerated = true;
+                    }
+                    _dataDirty |= rebuild;
 
                     SetDrawRangeToContainCaretPosition(caretSelectPositionInternal);
 
-                    processed = processed.Substring( CaretPositionToTextIndex(m_DrawStart, true), Mathf.Min(CaretPositionToTextIndex(m_DrawEnd), processed.Length) - CaretPositionToTextIndex(m_DrawStart, true));
-
-                    //
-                    ImageTexture.Clear();
-                    var sprites = null == SpritePackage ? Sprites : SpritePackage.Sprites;
-                    for (int i = 0; i < sprites.LengthSafe(); i++)
-                    {
-                        if (null != sprites[i])
-                            ImageTexture[i] = sprites[i].texture;
-                    }
-
                     SetCaretVisible();
                 }
-                //m_TextComponent.CustomElements = CustomElements;
-                //m_TextComponent.text = processed;
+
                 MarkGeometryAsDirty();
                 SetAllDirty();
                 m_PreventFontCallback = false;
@@ -2549,7 +2543,7 @@ namespace NUI
             startChar = Mathf.Max(m_DrawStart, startChar);
             endChar = Mathf.Min(m_DrawEnd, endChar);
 
-            endChar -= 1;
+            //endChar -= 1;
             NTextGenerator gen = textComponent.cachedTextGenerator;
 
             if (gen.lineCount <= 0)
@@ -2979,16 +2973,25 @@ namespace NUI
         /// <summary>
         /// Get the displayed with of all input characters.
         /// </summary>
-        //public virtual float preferredWidth
-        //{
-        //    get
-        //    {
-        //        if (textComponent == null)
-        //            return 0;
-        //        var settings = textComponent.GetGenerationSettings(Vector2.zero);
-        //        return textComponent.cachedTextGeneratorForLayout.GetPreferredWidth(m_Text, settings) / textComponent.pixelsPerUnit;
-        //    }
-        //}
+        public override float preferredWidth
+        {
+            get
+            {
+                //if (textComponent == null)
+                //    return 0;
+                //var settings = textComponent.GetGenerationSettings(Vector2.zero);
+                //return textComponent.cachedTextGeneratorForLayout.GetPreferredWidth(m_Text, settings) / textComponent.pixelsPerUnit;
+                Vector2 extents = textComponent.rectTransform.rect.size;
+                var settings = textComponent.GetGenerationSettings(textComponent.GetGenerationSettings(extents));
+                settings.horizontalOverflow = HorizontalWrapMode.Overflow;
+                settings.generateOutOfBounds = true;
+                settings.ignoreNewline = m_LineType == LineType.SingleLine;
+                if (Populate(text, cachedTextGeneratorForLayout, settings, textElementsForLayout))
+                    return cachedTextGeneratorForLayout.RealTextWidth;
+                else
+                    return cachedTextGenerator.RealTextWidth;
+            }
+        }
 
         /// <summary>
         /// See ILayoutElement.flexibleWidth.
@@ -3003,16 +3006,24 @@ namespace NUI
         /// <summary>
         /// Get the height of all the text if constrained to the height of the RectTransform.
         /// </summary>
-        //public virtual float preferredHeight
-        //{
-        //    get
-        //    {
-        //        if (textComponent == null)
-        //            return 0;
-        //        var settings = textComponent.GetGenerationSettings(new Vector2(textComponent.rectTransform.rect.size.x, 0.0f));
-        //        return textComponent.cachedTextGeneratorForLayout.GetPreferredHeight(m_Text, settings) / textComponent.pixelsPerUnit;
-        //    }
-        //}
+        public override float preferredHeight
+        {
+            get
+            {
+                //if (textComponent == null)
+                //    return 0;
+                //var settings = textComponent.GetGenerationSettings(new Vector2(textComponent.rectTransform.rect.size.x, 0.0f));
+                //return textComponent.cachedTextGeneratorForLayout.GetPreferredHeight(m_Text, settings) / textComponent.pixelsPerUnit;
+                Vector2 extents = textComponent.rectTransform.rect.size;
+                var settings = textComponent.GetGenerationSettings(textComponent.GetGenerationSettings(extents));
+                settings.generateOutOfBounds = true;
+                settings.ignoreNewline = m_LineType == LineType.SingleLine;
+                if (Populate(text, cachedTextGeneratorForLayout, settings, textElementsForLayout))
+                    return cachedTextGeneratorForLayout.RealTextHeight;
+                else
+                    return cachedTextGenerator.RealTextHeight;
+            }
+        }
 
         /// <summary>
         /// See ILayoutElement.flexibleHeight.
@@ -3120,9 +3131,9 @@ namespace NUI
         {
             int realIndex = 0;
             int txtCharet = 0;
-            for (int i = 0; i < TextElements.Count; i++)
+            for (int i = 0; i < textElements.Count; i++)
             {
-                var e = TextElements[i];
+                var e = textElements[i];
                 if (0 == e.CustomCharTag)
                 {
                     var length = null == e.Text ? 0 : e.Text.Length;
@@ -3159,9 +3170,9 @@ namespace NUI
 
             int index = 0;
             int txtCharet = 0;
-            for (int i = 0; i < TextElements.Count; i++)
+            for (int i = 0; i < textElements.Count; i++)
             {
-                var e = TextElements[i];
+                var e = textElements[i];
                 if (0 == e.CustomCharTag)
                 {
                     var length = null == e.Text ? 0 : e.Text.Length;
@@ -3185,7 +3196,7 @@ namespace NUI
                         element.BottomColor = element.TopColor;
                         element.FontStyle = textComponent.fontStyle;
                         element.FontSize = textComponent.fontSize;
-                        TextElements.Insert(i, element);
+                        textElements.Insert(i, element);
                         m_Text = m_Text.Insert(txtCharet, str);
                         return;
                     }
@@ -3202,7 +3213,7 @@ namespace NUI
                 element.BottomColor = element.TopColor;
                 element.FontStyle = textComponent.fontStyle;
                 element.FontSize = textComponent.fontSize;
-                TextElements.Add(element);
+                textElements.Add(element);
                 m_Text += str;
             }
         }
@@ -3211,13 +3222,13 @@ namespace NUI
 
         protected void DeleteChar(int start, int end)
         {
-            if (elementPos.Length < TextElements.Count * 2)
-                Array.Resize(ref elementPos, TextElements.Count * 2);
+            if (elementPos.Length < textElements.Count * 2)
+                Array.Resize(ref elementPos, textElements.Count * 2);
 
             int index = 0;
-            for (int i = 0; i < TextElements.Count; i++)
+            for (int i = 0; i < textElements.Count; i++)
             {
-                var e = TextElements[i];
+                var e = textElements[i];
                 if (0 == e.CustomCharTag)
                 {
                     var length = null == e.Text ? 0 : e.Text.Length;
@@ -3234,12 +3245,12 @@ namespace NUI
                 }
             }
 
-            int count = TextElements.Count;
+            int count = textElements.Count;
             for (int i = count - 1; i >= 0; i--)
             {
                 var eStart = elementPos[i * 2];
                 var eEnd = elementPos[i * 2 + 1];
-                var e = TextElements[i];
+                var e = textElements[i];
 
                 var length = e.CustomCharTag == 0 ? (null == e.Text ? 0 : e.Text.Length) : 1;
                 if (eStart < end && eEnd >= start)
@@ -3254,7 +3265,7 @@ namespace NUI
                             CustomElements.Remove(e.CustomCharTag);
 
                         TextElementPool.Release(e);
-                        TextElements.RemoveAt(i);
+                        textElements.RemoveAt(i);
                     }
                     else
                     {
@@ -3299,13 +3310,15 @@ namespace NUI
         UIVertex[] vertexQuad = new UIVertex[4];
         protected override void OnPopulateMesh(VertexHelper vh)
         {
-            //if (Populate())
-            //{
-            ProcessMaterial();
+            if (_dataDirty)
+            {
+                _dataDirty = false;
 
-            if (this.gameObject.activeInHierarchy && this.enabled && !_coAnimation)
-                StartCoroutine(UpdateSprite());
-            //}
+                ProcessMaterial();
+
+                if (this.gameObject.activeInHierarchy && this.enabled && !_coAnimation)
+                    StartCoroutine(UpdateSprite());
+            }
 
             vh.Clear();
             for (int i = m_DrawStart; i <= m_DrawEnd; i++)
