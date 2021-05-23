@@ -93,6 +93,7 @@ namespace NUI
         public bool OverflowEllipsis;
         public float maxOverflowWidth;
         public bool ignoreNewline;
+        public float CharacterSpacing;
 
         public bool Equals(NTextGenerationSettings other)
         {
@@ -104,7 +105,7 @@ namespace NUI
                 ReferenceEquals(this.font, other.font) && ReferenceEquals(this.Sprites, other.Sprites) && this.DefaultAnimLength == other.DefaultAnimLength && this.DefaultAnimFrame == other.DefaultAnimFrame &&
                 Mathf.Approximately(this.DefaultSpriteScale, other.DefaultSpriteScale) && this.DefaultSpriteAlign == other.DefaultSpriteAlign && this.GradientColor == other.GradientColor && this.BottomColor.Compare(other.BottomColor) &&
                 this.Outline == other.Outline && this.OutlineColor.Compare(other.OutlineColor) && Mathf.Approximately(this.OutlineSize, other.OutlineSize) && this.ParagraphIndent == other.ParagraphIndent &&
-                this.OverflowEllipsis == other.OverflowEllipsis && Mathf.Approximately(this.maxOverflowWidth, other.maxOverflowWidth) && this.ignoreNewline == other.ignoreNewline;
+                this.OverflowEllipsis == other.OverflowEllipsis && Mathf.Approximately(this.maxOverflowWidth, other.maxOverflowWidth) && this.ignoreNewline == other.ignoreNewline && Mathf.Approximately(this.CharacterSpacing, other.CharacterSpacing);
         }
 
         public int SpriteLength { get { return null == Sprites ? 0 : Sprites.Length; } }
@@ -253,8 +254,8 @@ namespace NUI
                         }
                         else if (settings.font.GetCharacterInfo(ch, out info, size, style))
                         {
-                            if ((settings.horizontalOverflow == HorizontalWrapMode.Wrap && lineRect.Width + info.advance > settings.generationExtents.x - lineRect.ParagraphIndent) ||
-                                (settings.horizontalOverflow == HorizontalWrapMode.Overflow && settings.maxOverflowWidth > 0 && lineRect.Width + info.advance > settings.maxOverflowWidth - lineRect.ParagraphIndent))
+                            if ((settings.horizontalOverflow == HorizontalWrapMode.Wrap && lineRect.Width + settings.CharacterSpacing + info.advance > settings.generationExtents.x - lineRect.ParagraphIndent) ||
+                                (settings.horizontalOverflow == HorizontalWrapMode.Overflow && settings.maxOverflowWidth > 0 && lineRect.Width + settings.CharacterSpacing + info.advance > settings.maxOverflowWidth - lineRect.ParagraphIndent))
                             {
                                 var lastLine = lineRect;
                                 lineRect = TextLinePool.Get();
@@ -277,8 +278,8 @@ namespace NUI
                                     {
                                         for (int index = glyphIndex + 1; index < characters.Count; index++)
                                         {
-                                            lastLine.Width -= characters[index].Advance;
-                                            lineRect.Width += characters[index].Advance;
+                                            lastLine.Width -= characters[index].Advance + settings.CharacterSpacing;
+                                            lineRect.Width += characters[index].Advance + (index == glyphIndex + 1 ? 0 : settings.CharacterSpacing);
                                         }
 
                                         lastLine.endCharIdx = glyphIndex + 1;
@@ -319,7 +320,7 @@ namespace NUI
 
                             characters.Add(richChar);
 
-                            lineRect.Width += info.advance;
+                            lineRect.Width += info.advance + (lineRect.endCharIdx == 0 ? 0 : settings.CharacterSpacing);
                             lineRect.endCharIdx = characters.Count;
                         }
                     }
@@ -391,7 +392,7 @@ namespace NUI
                         AnimGlyphs.Add(characters.Count, new NTextAnim { StartSpriteIndex = spriteIndex, AnimLength = element.AnimLength, AnimFrame = element.AnimFrame, LastSpriteIndex = spriteIndex });
                     characters.Add(richChar);
 
-                    lineRect.Width += richChar.Advance;
+                    lineRect.Width += richChar.Advance + (characters.Count > lineRect.startCharIdx ? characters.Count : 0);
                     lineRect.endCharIdx = characters.Count;
                 }
             }
@@ -654,7 +655,7 @@ namespace NUI
                         glyphStrikethrough = null;
                     }
 
-                    lineWidth += glyph.Advance;
+                    lineWidth += glyph.Advance + settings.CharacterSpacing;
                 }
             }
 

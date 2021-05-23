@@ -202,6 +202,21 @@ namespace NUI
             }
         }
 
+        [SerializeField]
+        protected float _characterSpacing = 0f;
+        public float CharacterSpacing
+        {
+            get { return _characterSpacing; }
+            set
+            {
+                if (_characterSpacing != value)
+                {
+                    _characterSpacing = value;
+                    SetAllDirty();
+                }
+            }
+        }
+
         protected static Material sDefaultEffectMaterial;
         protected static Material defaultEffectMaterial
         {
@@ -633,6 +648,7 @@ namespace NUI
                 ParagraphIndent = ParagraphIndent,
                 OverflowEllipsis = OverflowEllipsis,
                 maxOverflowWidth = MaxOverflowWidth,
+                CharacterSpacing = CharacterSpacing,
             };
             return generationSettings;
         }

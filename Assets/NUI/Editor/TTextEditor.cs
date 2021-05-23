@@ -30,6 +30,7 @@ namespace NUI
         private SerializedProperty m_ParagraphIndent;
         private SerializedProperty m_OverflowEllipsis;
         private SerializedProperty m_MaxOverflowWidth;
+        private SerializedProperty m_CharacterSpacing;
 
         protected override void OnEnable()
         {
@@ -54,6 +55,7 @@ namespace NUI
             m_ParagraphIndent = serializedObject.FindProperty("_paragraphIndent");
             m_OverflowEllipsis = serializedObject.FindProperty("_overflowEllipsis");
             m_MaxOverflowWidth = serializedObject.FindProperty("_maxOverflowWidth");
+            m_CharacterSpacing = serializedObject.FindProperty("_characterSpacing");
         }
 
         public override void OnInspectorGUI()
@@ -92,6 +94,7 @@ namespace NUI
             EditorGUILayout.PropertyField(m_DefaultSpriteAlign, true);
             EditorGUILayout.PropertyField(m_ParagraphIndent);
             EditorGUILayout.PropertyField(m_OverflowEllipsis);
+            EditorGUILayout.PropertyField(m_CharacterSpacing);
             if (((NText)target).horizontalOverflow == HorizontalWrapMode.Overflow)
                 EditorGUILayout.PropertyField(m_MaxOverflowWidth);
 
